@@ -8,6 +8,13 @@ Discord用多機能BOTを作ろう
 │   └── ready.js
 ├── commands/
 │   ├── ojisan.js
+│   ├── mc2tja.js
+│   ├── (others...)
+├── lib/
+│   └── mc2tja/
+│       ├── mc2tja.js
+│       ├── mcreader.js
+│       ├── (others...)
 ├── public/
 │   ├── index.html
 ├── deploy-commands.js
