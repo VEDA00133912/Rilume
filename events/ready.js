@@ -1,5 +1,4 @@
 // ready.js
-// 起動処理
 
 const { Events } = require('discord.js');
 

@@ -18,7 +18,9 @@
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "makeitaquote": "^8.0.1"
+    "makeitaquote": "^8.0.1",
+    "mongoose": "^8.17.0",
+    "node-cron": "^4.2.1"
   },
   "devDependencies": {
     "prettier": "3.6.2"
