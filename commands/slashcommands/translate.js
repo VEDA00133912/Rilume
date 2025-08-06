@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { translator } = require('../lib/translate/translator');
-const invalidContentChecks = require('../utils/invalidContentRegex');
-const { createEmbed } = require('../utils/createEmbed');
+const { translator } = require('../../lib/translate/translator');
+const invalidContentChecks = require('../../utils/invalidContentRegex');
+const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
     cooldown: 10,

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { generateTotsuzenshi } = require('../lib/totsuzenshi/totsuzenshi');
-const invalidContentChecks = require('../utils/invalidContentRegex');
+const { generateTotsuzenshi } = require('../../lib/totsuzenshi/totsuzenshi');
+const invalidContentChecks = require('../../utils/invalidContentRegex');
 
 module.exports = {
     cooldown: 5,

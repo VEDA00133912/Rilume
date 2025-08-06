@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const TLANSLATE_API_URL = 'https://oji.itstom.dev/api/translate';
-const { createEmbed } = require('../utils/createEmbed');
+const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
   data: new SlashCommandBuilder()

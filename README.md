@@ -7,16 +7,25 @@ Discord用多機能BOTを作ろう
 │   ├── interactionCreate.js
 │   └── ready.js
 ├── commands/
-│   ├── ojisan.js
-│   ├── mc2tja.js
-│   ├── (others...)
+│   └── slashcommands/
+│     ├── ojisan.js
+│     ├── mc2tja.js
+│     └── (others...)
+│   └── contextmenu/
+│   └── userinstall/
 ├── lib/
 │   └── mc2tja/
-│       ├── mc2tja.js
-│       ├── mcreader.js
-│       ├── (others...)
+│     ├── mc2tja.js
+│     ├── mcreader.js
+│     └── (others...)
+│   └── translate/
+│     ├── translator.js
+│     └── specialTranslator.js
+├── utils/
+│   ├── checkPermissions.js
+│   └── createEmbed.js
 ├── public/
-│   ├── index.html
+│   └── index.html
 ├── deploy-commands.js
 └── index.js
 ```
