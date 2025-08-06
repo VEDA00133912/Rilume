@@ -28,7 +28,9 @@ module.exports = {
     });
 
     if (alreadyDrawn) {
-      await interaction.editReply('今日のおみくじはもう引いています。明日また引いてください！');
+      await interaction.editReply(
+        '今日のおみくじはもう引いています。明日また引いてください！',
+      );
       return;
     }
 

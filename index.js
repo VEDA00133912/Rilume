@@ -8,16 +8,15 @@ const express = require('express');
 const TOKEN = process.env.TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI)
+mongoose
+  .connect(MONGODB_URI)
   .then(() => {
     console.log('MongoDBに接続されました');
-    require('./lib/omikuji/resetOmikuji')
+    require('./lib/omikuji/resetOmikuji');
   })
   .catch((error) => {
     console.error('MongoDB接続エラー:', error);
   });
-
-
 
 // コマンドのロード
 const getCommandFilesRecursively = require('./utils/getCommandFiles');
