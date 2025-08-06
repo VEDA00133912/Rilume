@@ -12,7 +12,6 @@ Discord用多機能BOTを作ろう
 │     ├── mc2tja.js
 │     └── (others...)
 │   └── contextmenu/
-│   └── userinstall/
 ├── lib/
 │   └── mc2tja/
 │     ├── mc2tja.js
