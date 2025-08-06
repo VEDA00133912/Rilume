@@ -16,19 +16,22 @@ module.exports = async function deployCommands(client) {
       client.commands.set(command.data.name, command);
       commands.push(command.data.toJSON());
     } else {
-      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      console.log(
+        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+      );
     }
   }
 
   const rest = new REST().setToken(TOKEN);
 
   try {
-    console.log(`Started refreshing ${commands.length} application (/) commands.`);
-    await rest.put(
-      Routes.applicationCommands(CLIENT_ID),
-      { body: commands }
+    console.log(
+      `Started refreshing ${commands.length} application (/) commands.`,
     );
-    console.log(`Successfully reloaded ${commands.length} application (/) commands.`);
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
+    console.log(
+      `Successfully reloaded ${commands.length} application (/) commands.`,
+    );
   } catch (error) {
     console.error(error);
   }

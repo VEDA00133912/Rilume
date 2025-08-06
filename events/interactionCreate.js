@@ -8,7 +8,9 @@ module.exports = {
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
+        console.error(
+          `No command matching ${interaction.commandName} was found.`,
+        );
         return;
       }
 
@@ -20,16 +22,22 @@ module.exports = {
       if (cooldownAmount > 0) {
         const userLastUsed = timestamps.get(interaction.user.id);
         if (userLastUsed && now < userLastUsed + cooldownAmount) {
-          const remaining = ((userLastUsed + cooldownAmount - now) / 1000).toFixed(1);
+          const remaining = (
+            (userLastUsed + cooldownAmount - now) /
+            1000
+          ).toFixed(1);
           return interaction.reply({
             content: `このコマンドはクールダウン中です。${remaining}秒後に再試行してください`,
-            flags: MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral,
           });
         }
 
         timestamps.set(interaction.user.id, now);
         cooldowns.set(command.data.name, timestamps);
-        setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
+        setTimeout(
+          () => timestamps.delete(interaction.user.id),
+          cooldownAmount,
+        );
       }
 
       try {
@@ -52,19 +60,22 @@ module.exports = {
           console.error('Failed to send error reply:', err);
         }
       }
-    }
-
-    else if (interaction.isContextMenuCommand()) {
+    } else if (interaction.isContextMenuCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (!command) {
-        console.error(`No context menu command matching ${interaction.commandName} was found.`);
+        console.error(
+          `No context menu command matching ${interaction.commandName} was found.`,
+        );
         return;
       }
 
       try {
         await command.execute(interaction);
       } catch (error) {
-        console.error(`Error executing context menu command ${command.data.name}:`, error);
+        console.error(
+          `Error executing context menu command ${command.data.name}:`,
+          error,
+        );
         try {
           if (interaction.replied || interaction.deferred) {
             await interaction.followUp({

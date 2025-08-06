@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "check": "prettier --check .",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -17,5 +19,8 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "makeitaquote": "^8.0.1"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
   }
 }

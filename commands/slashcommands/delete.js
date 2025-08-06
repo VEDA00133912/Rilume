@@ -1,17 +1,24 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, Colors } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  MessageFlags,
+  Colors,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
+  cooldown: 5,
   data: new SlashCommandBuilder()
     .setName('delete')
     .setDescription('指定したメッセージを削除します')
-    .addIntegerOption(option =>
-      option.setName('count')
+    .addIntegerOption((option) =>
+      option
+        .setName('count')
         .setDescription('削除したいメッセージの数を入力')
         .setRequired(true)
         .setMinValue(1)
-        .setMaxValue(100)
+        .setMaxValue(100),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
@@ -19,7 +26,7 @@ module.exports = {
     const requiredPermissions = [
       PermissionFlagsBits.ManageMessages,
       PermissionFlagsBits.ReadMessageHistory,
-      PermissionFlagsBits.ViewChannel
+      PermissionFlagsBits.ViewChannel,
     ];
 
     if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
@@ -35,23 +42,25 @@ module.exports = {
         embeds: [
           createEmbed(interaction.client, {
             title: '削除できるメッセージがありません',
-            description: '削除対象が存在しないか、14日以上前のメッセージのため削除できませんでした',
-            color: Colors.Yellow
-          })
-        ]
+            description:
+              '削除対象が存在しないか、14日以上前のメッセージのため削除できませんでした',
+            color: Colors.Yellow,
+          }),
+        ],
       });
     }
 
-    const description = messages.size < count
-      ? `${messages.size} 件のメッセージを削除しました（指定: ${count} 件）\n※一部のメッセージは14日以上経過しているため削除できませんでした`
-      : `${messages.size} 件のメッセージを削除しました`;
+    const description =
+      messages.size < count
+        ? `${messages.size} 件のメッセージを削除しました（指定: ${count} 件）\n※一部のメッセージは14日以上経過しているため削除できませんでした`
+        : `${messages.size} 件のメッセージを削除しました`;
 
     const embed = createEmbed(interaction.client, {
       title: 'メッセージ削除完了',
       description,
-      color: Colors.Green
+      color: Colors.Green,
     });
 
     await interaction.editReply({ embeds: [embed] });
-  }
+  },
 };

@@ -26,7 +26,8 @@ const permissionNames = {
   [PermissionFlagsBits.AddReactions]: 'リアクションを追加',
   [PermissionFlagsBits.UseExternalEmojis]: '外部の絵文字を使用する',
   [PermissionFlagsBits.UseExternalStickers]: '外部のスタンプを使用する',
-  [PermissionFlagsBits.MentionEveryone]: '@everyone、@here、すべてのロールにメンション',
+  [PermissionFlagsBits.MentionEveryone]:
+    '@everyone、@here、すべてのロールにメンション',
   [PermissionFlagsBits.ManageMessages]: 'メッセージの管理',
   [PermissionFlagsBits.ManageThreads]: 'スレッドの管理',
   [PermissionFlagsBits.ReadMessageHistory]: 'メッセージ履歴を読む',
@@ -60,21 +61,25 @@ const permissionNames = {
  */
 
 async function checkBotPermissions(interaction, requiredPermissions) {
-  const botPermissions = interaction.channel.permissionsFor(interaction.client.user);
-  const missing = requiredPermissions.filter(p => !botPermissions?.has(p));
+  const botPermissions = interaction.channel.permissionsFor(
+    interaction.client.user,
+  );
+  const missing = requiredPermissions.filter((p) => !botPermissions?.has(p));
 
   if (missing.length > 0) {
-    const missingNames = missing.map(p => permissionNames[p] || `不明な権限 (${p.toString()})`);
+    const missingNames = missing.map(
+      (p) => permissionNames[p] || `不明な権限 (${p.toString()})`,
+    );
 
     await interaction.reply({
       embeds: [
         createEmbed(interaction.client, {
           title: '権限が不足しています',
           description: `Bot に以下の権限がありません\n\`\`\`\n・${missingNames.join('\n・')}\n\`\`\``,
-          color: Colors.Red
-        })
+          color: Colors.Red,
+        }),
       ],
-      flags: MessageFlags.Ephemeral
+      flags: MessageFlags.Ephemeral,
     });
 
     return false;
