@@ -1,14 +1,16 @@
-const { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js')
+const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js')
 const fs = require('fs')
 const path = require('path')
 const AdmZip = require('adm-zip')
 const { MCReader } = require('../lib/mc2tja/mcreader')
 const { mc2tja } = require('../lib/mc2tja/mc2tja')
+const { createEmbed } = require('../utils/createEmbed');
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024
 const TEMP_DIR = path.join(__dirname, '..', 'temp')
 
 module.exports = {
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('mc2tja')
     .setDescription('MC・MCZ(Malodyの譜面ファイル)をTJAに変換します')
@@ -53,8 +55,8 @@ module.exports = {
     const fileInfo = getFileInfo(mcReader, converter)
     const tjaAttachment = new AttachmentBuilder(tjaFilePath, { name: tjaFilename })
 
-    const embed = new EmbedBuilder()
-      .addFields(
+    const embed = createEmbed(interaction.client, {
+      fields: [
         { name: '元ファイル', value: `${attachment.name}${name.endsWith('.mcz') ? ` → ${originalFilename}` : ''}` },
         { name: '変換後ファイル', value: tjaFilename },
         { name: '楽曲名', value: fileInfo.title },
@@ -62,9 +64,8 @@ module.exports = {
         { name: '難易度', value: `${fileInfo.course} (${fileInfo.level}★)` },
         { name: 'BPM', value: String(fileInfo.bpm) },
         { name: 'ノーツ数', value: String(fileInfo.noteCount) }
-      )
-      .setColor('#f34728')
-      .setTimestamp()
+      ],
+    });
 
     await interaction.editReply({
       content: '変換が完了しました！',

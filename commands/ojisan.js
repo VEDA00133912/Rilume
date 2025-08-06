@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const TLANSLATE_API_URL = 'https://oji.itstom.dev/api/translate';
+const { createEmbed } = require('../utils/createEmbed');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,13 +22,12 @@ module.exports = {
 
       const translated = response.data?.translation ?? '翻訳結果が見つかりません';
 
-      const embed = new EmbedBuilder()
-        .addFields(
+      const embed = createEmbed(interaction.client, {
+        fields: [
           { name: '入力テキスト', value: inputText },
           { name: 'おじさん構文', value: translated }
-        )
-        .setColor('#6596e3')
-        .setTimestamp();
+        ]
+        });
 
       await interaction.editReply({ embeds: [embed] });
 
