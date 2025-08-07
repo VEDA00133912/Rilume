@@ -8,6 +8,7 @@ const XGD_API_URL = 'https://xgd.io/V1/shorten';
 function isValidUrl(string) {
   try {
     new URL(string);
+
     return true;
   } catch (_) {
     return false;
@@ -40,7 +41,7 @@ module.exports = {
       return await interaction.editReply('有効なURLを入力してください。');
     }
 
-    const response = await axios.get('https://xgd.io/V1/shorten', {
+    const response = await axios.get(XGD_API_URL, {
       params: {
         url: originalUrl,
         key: API_KEY,

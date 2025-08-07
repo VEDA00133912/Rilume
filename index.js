@@ -21,6 +21,7 @@ mongoose
 // コマンドのロード
 const getCommandFilesRecursively = require('./utils/getCommandFiles');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
 client.commands = new Collection();
 client.cooldowns = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
@@ -28,6 +29,7 @@ const commandFiles = getCommandFilesRecursively(commandsPath);
 
 for (const filePath of commandFiles) {
   const command = require(filePath);
+
   if ('data' in command && 'execute' in command) {
     client.commands.set(command.data.name, command);
   } else {
@@ -46,6 +48,7 @@ const eventFiles = fs
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
   const event = require(filePath);
+
   if (event.once) {
     client.once(event.name, (...args) => event.execute(...args));
   } else {

@@ -21,6 +21,7 @@ module.exports = {
     await interaction.deferReply();
 
     const text = interaction.options.getString('text');
+
     if (!text) {
       return interaction.editReply({ content: 'テキストが指定されていません' });
     }

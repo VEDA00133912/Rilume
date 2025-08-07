@@ -7,10 +7,12 @@ module.exports = {
 
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
+
       if (!command) {
         console.error(
           `No command matching ${interaction.commandName} was found.`,
         );
+
         return;
       }
 
@@ -21,11 +23,13 @@ module.exports = {
 
       if (cooldownAmount > 0) {
         const userLastUsed = timestamps.get(interaction.user.id);
+
         if (userLastUsed && now < userLastUsed + cooldownAmount) {
           const remaining = (
             (userLastUsed + cooldownAmount - now) /
             1000
           ).toFixed(1);
+
           return interaction.reply({
             content: `このコマンドはクールダウン中です。${remaining}秒後に再試行してください`,
             flags: MessageFlags.Ephemeral,
@@ -62,10 +66,12 @@ module.exports = {
       }
     } else if (interaction.isContextMenuCommand()) {
       const command = client.commands.get(interaction.commandName);
+
       if (!command) {
         console.error(
           `No context menu command matching ${interaction.commandName} was found.`,
         );
+
         return;
       }
 

@@ -26,6 +26,7 @@ function createEmbed(
     const validFields = fields.filter(
       (f) => typeof f.name === 'string' && typeof f.value === 'string',
     );
+
     if (validFields.length > 0) embed.addFields(validFields);
   }
 

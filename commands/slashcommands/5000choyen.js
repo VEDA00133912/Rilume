@@ -1,4 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const gosenChoyen_API_URL = 'https://gsapi.cbrx.io/image';
 
@@ -7,6 +11,14 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('5000choyen')
     .setDescription('5000兆円欲しい!!画像を生成します')
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+    ])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ])
     .addStringOption((option) =>
       option
         .setName('top')

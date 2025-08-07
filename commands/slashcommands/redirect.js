@@ -26,6 +26,7 @@ module.exports = {
         description: `❌ ${redirectResult.error}`,
         color: Colors.Red,
       });
+
       return await interaction.editReply({ embeds: [errorEmbed] });
     }
 

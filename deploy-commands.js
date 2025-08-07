@@ -1,5 +1,6 @@
 const { REST, Routes } = require('discord.js');
 const path = require('node:path');
+
 require('dotenv').config();
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -12,6 +13,7 @@ module.exports = async function deployCommands(client) {
 
   for (const filePath of commandFiles) {
     const command = require(filePath);
+
     if ('data' in command && 'execute' in command) {
       client.commands.set(command.data.name, command);
       commands.push(command.data.toJSON());

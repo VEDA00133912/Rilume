@@ -7,6 +7,7 @@ function getCommandFilesRecursively(dir) {
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
+
     if (entry.isDirectory()) {
       files.push(...getCommandFilesRecursively(fullPath));
     } else if (entry.isFile() && entry.name.endsWith('.js')) {

@@ -17,6 +17,7 @@ module.exports = {
 
   async execute(interaction) {
     const inputText = interaction.options.getString('text');
+
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const response = await axios.post(

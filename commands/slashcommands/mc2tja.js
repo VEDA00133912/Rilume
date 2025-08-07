@@ -25,10 +25,12 @@ module.exports = {
     await interaction.deferReply();
 
     const attachment = interaction.options.getAttachment('file');
+
     if (!attachment)
       return replyError(interaction, 'ファイルが添付されていません');
 
     const name = attachment.name.toLowerCase();
+
     if (!name.endsWith('.mc') && !name.endsWith('.mcz'))
       return replyError(interaction, '.mcまたは.mczファイルのみ対応しています');
 
@@ -48,10 +50,12 @@ module.exports = {
       : { content: fileBuffer.toString('utf8'), filename: attachment.name };
 
     const mcReader = new MCReader();
+
     mcReader.parse(mcContent);
     mcReader.filename = originalFilename;
 
     const converter = new mc2tja();
+
     if (!converter.convert(mcReader)) {
       return replyError(interaction, '変換に失敗しました');
     }
@@ -96,7 +100,9 @@ module.exports = {
 
 async function downloadFile(url) {
   const res = await fetch(url);
+
   if (!res.ok) throw new Error(`Download failed: ${res.statusText}`);
+
   return Buffer.from(await res.arrayBuffer());
 }
 
@@ -106,7 +112,9 @@ async function extractMCZ(buffer, interaction) {
   const mcEntry = zip
     .getEntries()
     .find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
+
   if (!mcEntry) throw new Error('.mcファイルが見つかりませんでした。');
+
   return {
     content: mcEntry.getData().toString('utf8'),
     filename: mcEntry.entryName,
@@ -116,7 +124,9 @@ async function extractMCZ(buffer, interaction) {
 function writeTempTJA(filename, content) {
   if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
   const filePath = path.join(TEMP_DIR, filename);
+
   fs.writeFileSync(filePath, content, 'utf8');
+
   return filePath;
 }
 
@@ -131,9 +141,11 @@ function getFileInfo(mcReader, converter) {
 
   try {
     const version = mcReader.meta?.version;
+
     if (version) {
       const courseIndex = converter.getCourseFromName(version);
       const levelNum = converter.getLevelFromName(version);
+
       if (courseIndex >= 0 && courseIndex < courseNames.length)
         course = courseNames[courseIndex];
       if (levelNum > 0)

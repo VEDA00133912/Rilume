@@ -31,10 +31,12 @@ module.exports = {
       await interaction.editReply(
         '今日のおみくじはもう引いています。明日また引いてください！',
       );
+
       return;
     }
 
     const result = drawOmikuji();
+
     await Omikuji.create({ userId, date: new Date() });
 
     const embed = createEmbed(interaction.client, {

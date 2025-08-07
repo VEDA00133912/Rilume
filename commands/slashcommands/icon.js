@@ -19,11 +19,13 @@ module.exports = {
 
   async execute(interaction) {
     const user = interaction.options.getUser('user') || interaction.user;
+
     if (!user) {
       await interaction.reply({
         content: 'サーバー内にユーザーが見つかりませんでした',
         flags: MessageFlags.Ephemeral,
       });
+
       return;
     }
 

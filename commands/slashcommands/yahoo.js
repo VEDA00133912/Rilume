@@ -11,6 +11,7 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const link = await fetchYahooNews();
+
     await interaction.editReply({ content: `${link}` });
   },
 };

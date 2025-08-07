@@ -12,11 +12,13 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
     const zipFilePath = await createEmoZip(interaction.guild);
+
     if (!zipFilePath) {
       return await interaction.editReply(
         '絵文字のZIPファイルの生成に失敗しました',
       );
     }
+
     const attachment = {
       files: [
         {
@@ -25,6 +27,7 @@ module.exports = {
         },
       ],
     };
+
     await interaction.editReply({
       content: `サーバー内の絵文字をZIPファイルにまとめました。以下からダウンロードできます`,
       ...attachment,
