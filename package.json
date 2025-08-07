@@ -23,7 +23,8 @@
     "express": "^5.1.0",
     "makeitaquote": "^8.0.1",
     "mongoose": "^8.17.0",
-    "node-cron": "^4.2.1"
+    "node-cron": "^4.2.1",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

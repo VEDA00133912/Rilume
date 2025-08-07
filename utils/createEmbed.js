@@ -1,21 +1,8 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 
-/**
- * 埋め込みメッセージを生成します
- * @param {object} client - Discord クライアント
- * @param {object} options -
- * @param {string} [options.title]
- * @param {string} [options.description]
- * @param {Array<{ name: string, value: string, inline?: boolean }>} [options.fields]
- * @param {string} [options.color]
- * @param {{ url: string }} [options.image]
- * @param {{ url: string }} [options.thumbnail]
- * @param {{ name: string, iconURL?: string }} [options.author]
- * @returns {EmbedBuilder}
- */
 function createEmbed(
   client,
-  { title, description, fields, color, image, thumbnail, author } = {},
+  { title, description, fields, color, image, thumbnail, author, footer } = {},
 ) {
   const embed = new EmbedBuilder();
 
@@ -40,12 +27,13 @@ function createEmbed(
     });
   }
 
-  embed.setColor(color || Colors.Aqua);
-  embed.setTimestamp();
   embed.setFooter({
-    text: client.user.displayName,
+    text: (footer && footer.name) || client.user.displayName,
     iconURL: client.user.displayAvatarURL() || undefined,
   });
+
+  embed.setColor(color || Colors.Aqua);
+  embed.setTimestamp();
 
   return embed;
 }
