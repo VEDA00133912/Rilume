@@ -16,7 +16,7 @@ module.exports = {
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
     ]),
-    
+
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
