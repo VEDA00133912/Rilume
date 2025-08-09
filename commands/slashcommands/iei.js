@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { generateIeiImage } = require('../../utils/iei/generateIei');
-const { downloadImage } = require('../../utils/iei/downloadIcon');
+const { generateIeiImage } = require('../../lib/iei/generateIei');
+const { downloadImage } = require('../../lib/iei/downloadIcon');
 
 module.exports = {
   cooldown: 10,
