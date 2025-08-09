@@ -15,7 +15,7 @@ function isValidUrl(string) {
     new URL(string);
 
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }

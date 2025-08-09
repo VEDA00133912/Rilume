@@ -6,3 +6,4 @@ commands/ojisan.js
 .prettierignore
 .prettierrc
 eslint.config.mjs
+test.js
