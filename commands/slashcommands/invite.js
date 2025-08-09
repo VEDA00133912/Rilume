@@ -11,7 +11,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('invite')
     .setDescription('Botの招待リンクを表示します')
-    .setContexts([InteractionContextType.Guild])
+    .setContexts([InteractionContextType.Guild, InteractionContextType.BotDM])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
@@ -21,11 +21,11 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const embed = createEmbed(interaction.client, {
-      description: '以下のリンクからBotをサーバーに招待できます',
+      description: '以下のリンクからBotを導入できます',
       fields: [
         {
-          name: '招待リンク',
-          value: `[ここをクリックして招待](https://discord.com/api/oauth2/authorize?client_id=${interaction.client.user.id})`,
+          name: 'リンク',
+          value: `**[ここをクリックして導入](https://discord.com/api/oauth2/authorize?client_id=${interaction.client.user.id})**`,
         },
       ],
     });

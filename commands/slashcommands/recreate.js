@@ -1,5 +1,7 @@
 const {
   SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
   PermissionFlagsBits,
   channelMention,
   MessageFlags,
@@ -17,6 +19,8 @@ module.exports = {
         .setDescription('作り直すチャンネル')
         .setRequired(true),
     )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
 
   async execute(interaction) {

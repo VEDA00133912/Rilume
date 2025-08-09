@@ -1,4 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { generateTotsuzenshi } = require('../../lib/totsuzenshi/totsuzenshi');
 const invalidContentChecks = require('../../utils/invalidContentRegex');
 
@@ -14,7 +18,15 @@ module.exports = {
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(100),
-    ),
+    )
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+    ])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     await interaction.deferReply();

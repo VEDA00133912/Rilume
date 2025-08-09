@@ -12,22 +12,26 @@ Discord用多機能BOTを作ろう
 │   └── slashcommands/
 │     ├── delete.js
 │     ├── mc2tja.js
-│     └── (others...)
+│     ├── others...
 │   └── contextmenu/
+│     ├── miq.js
+│     ├── totsuzenshi.js
 ├── lib/
 │   └── mc2tja/
 │     ├── mc2tja.js
 │     ├── mcreader.js
-│     └── (others...)
 │   └── translate/
 │     ├── translator.js
 │     └── specialTranslator.js
+│   └── others...
 ├── utils/
 │   ├── checkPermissions.js
 │   └── createEmbed.js
+│   └── others...
 ├── public/
 │   └── index.html
 ├── deploy-commands.js
+├── package.json
 └── index.js
 ```
 

@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const { generatNitroCode } = require('../../lib/generate/nitro');
 
@@ -24,7 +29,9 @@ module.exports = {
         .setRequired(true)
         .setMinValue(1)
         .setMaxValue(20),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
   async execute(interaction) {
     const type = interaction.options.getString('type');
     const count = interaction.options.getInteger('count');
@@ -32,7 +39,7 @@ module.exports = {
     const prepareEmbed = createEmbed(interaction.client, {
       title: 'Nitroリンク生成中',
       description: `タイプ: ${type}\n生成数: ${count}`,
-      color: '#de98f1', // nitroカラー。de98f1かd29cf3
+      color: '#de98f1',
     });
 
     await interaction.reply({
@@ -45,9 +52,7 @@ module.exports = {
     const embed = createEmbed(interaction.client, {
       description: `**生成が完了しました**\n${nitroLinks.join('\n')}`,
       color: '#de98f1',
-      footer: {
-        text: 'このコードは実際に使えるものではありません。あくまでジョークコマンドです',
-      },
+      footer: 'このコードは実際に使えるものではありません',
     });
 
     await interaction.editReply({

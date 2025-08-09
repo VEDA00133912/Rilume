@@ -11,14 +11,17 @@ function createEmbed(
 
   if (Array.isArray(fields) && fields.length > 0) {
     const validFields = fields.filter(
-      (f) => typeof f.name === 'string' && typeof f.value === 'string',
+      (f) =>
+        typeof f.name === 'string' &&
+        typeof f.value === 'string' &&
+        (f.inline === undefined || typeof f.inline === 'boolean'),
     );
 
     if (validFields.length > 0) embed.addFields(validFields);
   }
 
-  if (image?.url) embed.setImage(image.url);
-  if (thumbnail?.url) embed.setThumbnail(thumbnail.url);
+  if (image) embed.setImage(image);
+  if (thumbnail) embed.setThumbnail(thumbnail);
 
   if (author?.name) {
     embed.setAuthor({
@@ -28,7 +31,7 @@ function createEmbed(
   }
 
   embed.setFooter({
-    text: (footer && footer.name) || client.user.displayName,
+    text: footer || client.user.displayName,
     iconURL: client.user.displayAvatarURL() || undefined,
   });
 

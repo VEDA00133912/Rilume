@@ -1,5 +1,7 @@
 const {
   SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
   MessageFlags,
   Colors,
   PermissionFlagsBits,
@@ -13,6 +15,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('slowmode')
     .setDescription('低速モードを設定します')
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .addIntegerOption((option) =>
       option
@@ -60,11 +64,20 @@ module.exports = {
 
     await channel.setRateLimitPerUser(seconds);
 
-    const embed = createEmbed(interaction.client, {
-      title: '低速モードの設定が完了しました',
-      description: `低速モードを${seconds}秒に設定しました`,
-      color: Colors.Green,
-    });
+    let embed;
+
+    if (seconds === 0) {
+      embed = createEmbed(interaction.client, {
+        description: '低速モードを解除しました',
+        color: Colors.Green,
+      });
+    } else {
+      embed = createEmbed(interaction.client, {
+        title: '低速モードの設定が完了しました',
+        description: `低速モードを${seconds}秒に設定しました`,
+        color: Colors.Green,
+      });
+    }
 
     await interaction.editReply({ embeds: [embed] });
   },

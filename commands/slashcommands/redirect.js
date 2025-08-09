@@ -1,4 +1,10 @@
-const { SlashCommandBuilder, MessageFlags, Colors } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+  Colors,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const { trackRedirects } = require('../../lib/redirect/redirectTracker');
 
@@ -12,7 +18,12 @@ module.exports = {
         .setName('url')
         .setDescription('追跡したいURLを入力')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -31,11 +42,9 @@ module.exports = {
     }
 
     const embed = createEmbed(interaction.client, {
-      title: 'リダイレクト追跡結果',
       fields: redirectResult.map((item, index) => ({
         name: `リダイレクト先 ${index + 1}`,
         value: item.url || '不明なURL',
-        inline: false,
       })),
       color: Colors.Green,
     });

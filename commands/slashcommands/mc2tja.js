@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  AttachmentBuilder,
+} = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const AdmZip = require('adm-zip');
@@ -7,7 +12,7 @@ const { mc2tja } = require('../../lib/mc2tja/mc2tja');
 const { createEmbed } = require('../../utils/createEmbed');
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
-const TEMP_DIR = path.join(__dirname, '..', 'temp');
+const TEMP_DIR = path.join(__dirname, '..', '..', 'temp');
 
 module.exports = {
   cooldown: 10,
@@ -19,7 +24,9 @@ module.exports = {
         .setName('file')
         .setDescription('変換するMCまたはMCZファイル')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply();
@@ -72,17 +79,17 @@ module.exports = {
 
     const embed = createEmbed(interaction.client, {
       fields: [
-        {
-          name: '元ファイル',
-          value: `${attachment.name}${name.endsWith('.mcz') ? ` → ${originalFilename}` : ''}`,
-        },
-        { name: '変換後ファイル', value: tjaFilename },
         { name: '楽曲名', value: fileInfo.title },
         { name: 'アーティスト名', value: fileInfo.artist },
-        { name: '難易度', value: `${fileInfo.course} (${fileInfo.level}★)` },
-        { name: 'BPM', value: String(fileInfo.bpm) },
-        { name: 'ノーツ数', value: String(fileInfo.noteCount) },
+        {
+          name: '難易度',
+          value: `${fileInfo.course} (${fileInfo.level}★)`,
+          inline: true,
+        },
+        { name: 'BPM', value: String(fileInfo.bpm), inline: true },
+        { name: 'ノーツ数', value: String(fileInfo.noteCount), inline: true },
       ],
+      footer: `${attachment.name}${name.endsWith('.mcz') ? ` → ${originalFilename}` : ''}`,
     });
 
     await interaction.editReply({

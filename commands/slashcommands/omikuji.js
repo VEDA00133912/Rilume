@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const Omikuji = require('../../models/omikuji');
 const { drawOmikuji } = require('../../lib/omikuji/drawOmikuji');
@@ -6,7 +11,9 @@ const { drawOmikuji } = require('../../lib/omikuji/drawOmikuji');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('omikuji')
-    .setDescription('今日のおみくじを引きます（一日一回まで）'),
+    .setDescription('今日のおみくじを引きます（一日一回まで）')
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -41,7 +48,7 @@ module.exports = {
 
     const embed = createEmbed(interaction.client, {
       description: `あなたは今日は **${result.label}** です！`,
-      image: { url: `attachment://${result.name}.png` },
+      image: `attachment://${result.name}.png`,
     });
 
     await interaction.editReply({

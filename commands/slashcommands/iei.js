@@ -1,6 +1,13 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  AttachmentBuilder,
+  userMention,
+} = require('discord.js');
 const { generateIeiImage } = require('../../lib/iei/generateIei');
 const { downloadImage } = require('../../lib/iei/downloadIcon');
+const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
   cooldown: 10,
@@ -12,7 +19,12 @@ module.exports = {
         .setName('target')
         .setDescription('遺影にするユーザー')
         .setRequired(false),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     await interaction.deferReply();
@@ -24,6 +36,12 @@ module.exports = {
     const image = await generateIeiImage(avatarBuffer);
     const attachment = new AttachmentBuilder(image, { name: 'iei.png' });
 
-    await interaction.editReply({ files: [attachment] });
+    const embed = createEmbed(interaction.client, {
+      description: `${userMention(user.id)}が死亡しました`,
+      image: 'attachment://iei.png',
+      footer: `${user.username} died...💀`,
+    });
+
+    await interaction.editReply({ embeds: [embed], files: [attachment] });
   },
 };

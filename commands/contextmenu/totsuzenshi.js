@@ -1,6 +1,7 @@
 const {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
+  InteractionContextType,
   ApplicationIntegrationType,
   MessageFlags,
 } = require('discord.js');
@@ -12,7 +13,11 @@ module.exports = {
   data: new ContextMenuCommandBuilder()
     .setName('突然の死ジェネレータ')
     .setType(ApplicationCommandType.Message)
-    .setIntegrationTypes([ApplicationIntegrationType.UserInstall]),
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });

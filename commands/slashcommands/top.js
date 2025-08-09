@@ -1,5 +1,7 @@
 const {
   SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
   PermissionFlagsBits,
   ChannelType,
   MessageFlags,
@@ -11,7 +13,9 @@ module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
     .setName('top')
-    .setDescription('このチャンネルの一番最初のメッセージを表示します'),
+    .setDescription('このチャンネルの一番最初のメッセージを表示します')
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     const channel = interaction.channel;

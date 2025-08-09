@@ -1,6 +1,11 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const axios = require('axios');
-const TLANSLATE_API_URL = 'https://oji.itstom.dev/api/translate';
+const TRANSLATE_API_URL = 'https://oji.itstom.dev/api/translate';
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
@@ -13,7 +18,12 @@ module.exports = {
         .setName('text')
         .setDescription('変換したいテキストを入力')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     const inputText = interaction.options.getString('text');
@@ -21,12 +31,15 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const response = await axios.post(
-      TLANSLATE_API_URL,
+      TRANSLATE_API_URL,
       { text: inputText },
-      {
-        headers: { 'Content-Type': 'application/json' },
-      },
+      { headers: { 'Content-Type': 'application/json' } },
     );
+
+    // { error: 'Translation failed' }
+    if (response.status === !200) {
+      return interaction.editReply('APIが動いていないので現在使用不可です');
+    }
 
     const translated = response.data?.translation ?? '翻訳結果が見つかりません';
 

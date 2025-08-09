@@ -1,5 +1,6 @@
 const {
-  SlashCommandBuilder,
+  ContextMenuCommandBuilder,
+  ApplicationCommandType,
   InteractionContextType,
   ApplicationIntegrationType,
   userMention,
@@ -9,23 +10,20 @@ const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
   cooldown: 5,
-  data: new SlashCommandBuilder()
-    .setName('icon')
-    .setDescription('指定したユーザーのアイコンを表示します')
-    .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('アイコンを表示するユーザー')
-        .setRequired(false),
-    )
-    .setContexts([InteractionContextType.Guild])
+  data: new ContextMenuCommandBuilder()
+    .setName('アイコン表示')
+    .setType(ApplicationCommandType.User)
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+    ])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
     ]),
 
   async execute(interaction) {
-    const user = interaction.options.getUser('user') || interaction.user;
+    const user = interaction.targetUser;
 
     if (!user) {
       await interaction.reply({
@@ -36,10 +34,9 @@ module.exports = {
       return;
     }
 
-    const icon = user.displayAvatarURL({ size: 2048, forceStatic: false });
     const embed = createEmbed(interaction.client, {
       description: `**${userMention(user.id)} のアイコン**`,
-      image: icon,
+      image: { url: user.displayAvatarURL({ size: 2048, forceStatic: false }) },
     });
 
     await interaction.reply({ embeds: [embed] });

@@ -40,7 +40,7 @@ module.exports = {
 
     const response = `${gosenChoyen_API_URL}?top=${encodeURIComponent(topText)}&bottom=${encodeURIComponent(bottomText)}&type=png`;
     const embed = createEmbed(interaction.client, {
-      image: { url: response },
+      image: response,
     });
 
     await interaction.reply({ embeds: [embed] });

@@ -47,7 +47,7 @@ module.exports = {
       try {
         await command.execute(interaction);
       } catch (error) {
-        console.error(`Error executing ${command.data.name}:`, error);
+        console.error(`Error executing ${command.data.name}`, error.message);
         try {
           if (interaction.replied || interaction.deferred) {
             await interaction.followUp({
@@ -80,7 +80,7 @@ module.exports = {
       } catch (error) {
         console.error(
           `Error executing context menu command ${command.data.name}:`,
-          error,
+          error.message,
         );
         try {
           if (interaction.replied || interaction.deferred) {

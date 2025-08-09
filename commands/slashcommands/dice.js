@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
@@ -21,7 +26,9 @@ module.exports = {
         .setDescription('サイコロの最大値を指定してください')
         .setMinValue(1)
         .setMaxValue(500),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });

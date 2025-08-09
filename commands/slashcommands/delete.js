@@ -1,5 +1,7 @@
 const {
   SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
   PermissionFlagsBits,
   MessageFlags,
   Colors,
@@ -20,6 +22,8 @@ module.exports = {
         .setMinValue(1)
         .setMaxValue(100),
     )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
   async execute(interaction) {

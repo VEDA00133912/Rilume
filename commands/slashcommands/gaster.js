@@ -1,4 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const { specialTranslator } = require('../../lib/translate/specialTranslator');
 const invalidContentChecks = require('../../utils/invalidContentRegex');
 const { createEmbed } = require('../../utils/createEmbed');
@@ -15,10 +20,12 @@ module.exports = {
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(200),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const text = interaction.options.getString('text');
 

@@ -1,4 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { createEmoZip } = require('../../lib/emoZip/emozip');
 
 module.exports = {
@@ -7,7 +11,9 @@ module.exports = {
     .setName('emozip')
     .setDescription(
       'サーバー内の絵文字をZIPファイルにまとめてダウンロードします',
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply();

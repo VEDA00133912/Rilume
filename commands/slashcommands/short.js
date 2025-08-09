@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+  MessageFlags,
+} = require('discord.js');
 const axios = require('axios');
 const { createEmbed } = require('../../utils/createEmbed');
 const API_KEY = process.env.XGD_API_KEY;
@@ -24,7 +29,9 @@ module.exports = {
         .setName('url')
         .setDescription('短縮したいURLを入力してください')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
