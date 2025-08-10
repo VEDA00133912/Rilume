@@ -3,6 +3,8 @@ const { createEmbed } = require('../utils/createEmbed');
 const {
   getMessageTypeDescription,
 } = require('../utils/getMessageTypeDescription');
+const { checkBlacklist, handleSpamCheck } = require('../utils/blackList');
+
 const MAX_LENGTH = 500;
 
 module.exports = {
@@ -10,13 +12,18 @@ module.exports = {
   async execute(message) {
     if (message.author.bot) return;
 
+    if (await checkBlacklist(message.author.id)) return;
+
     const linkRegex =
       /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/g;
+
     const match = linkRegex.exec(message.content);
 
     if (!match) return;
 
+    if (await handleSpamCheck(message.author.id)) return;
     const [fullUrl, , channelId, messageId] = match;
+
     const client = message.client;
 
     try {
@@ -33,7 +40,7 @@ module.exports = {
       const descriptionFromType = getMessageTypeDescription(targetMsg, fullUrl);
       let description = descriptionFromType || targetMsg.content || '';
 
-      let image = undefined;
+      let image;
       const attachments = targetMsg.attachments;
 
       if (attachments.size === 1) {
@@ -69,14 +76,7 @@ module.exports = {
         allowedMentions: { repliedUser: false },
       });
     } catch (error) {
-      if (
-        error.code === 10008 || // Unknown Message
-        error.code === 50001 || // Missing Access
-        error.code === 50013 // Missing Permissions
-      ) {
-        return;
-      }
-
+      if ([10008, 50001, 50013].includes(error.code)) return;
       console.error('メッセージリンク処理中にエラー:', error.message);
     }
   },
