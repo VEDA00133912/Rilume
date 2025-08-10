@@ -4,13 +4,19 @@ const {
   getMessageTypeDescription,
 } = require('../utils/getMessageTypeDescription');
 const { checkBlacklist, handleSpamCheck } = require('../utils/blackList');
-
+const Expand = require('../models/expandGuild');
 const MAX_LENGTH = 500;
 
 module.exports = {
   name: Events.MessageCreate,
   async execute(message) {
     if (message.author.bot) return;
+
+    if (!message.guild) return;
+
+    const settings = await Expand.findOne({ guildId: message.guild.id });
+
+    if (settings && settings.expand === false) return;
 
     if (await checkBlacklist(message.author.id)) return;
 
@@ -22,6 +28,7 @@ module.exports = {
     if (!match) return;
 
     if (await handleSpamCheck(message.author.id)) return;
+
     const [fullUrl, , channelId, messageId] = match;
 
     const client = message.client;
@@ -32,6 +39,7 @@ module.exports = {
       if (!channel) return;
 
       const targetMsg = await channel.messages.fetch(messageId);
+
       const inviteOrImgurRegex =
         /(https?:\/\/(?:www\.)?(?:discord\.gg|discordapp\.com\/invite)\/[^\s]+|https?:\/\/(?:i\.)?imgur\.com\/\S+)/i;
 
@@ -61,7 +69,7 @@ module.exports = {
 
       const embedOptions = {
         author: {
-          name: `${targetMsg.member?.displayName || targetMsg.author.tag}が送信したメッセージ`,
+          name: targetMsg.member?.displayName || targetMsg.author.tag,
           iconURL: targetMsg.author.displayAvatarURL({ size: 64 }),
         },
         footer: `sent by ${targetMsg.author.tag}`,

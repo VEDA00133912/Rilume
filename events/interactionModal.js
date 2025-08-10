@@ -71,15 +71,15 @@ module.exports = {
     }
 
     if (interaction.isButton()) {
-        const embed = interaction.message.embeds[0];
+      const embed = interaction.message.embeds[0];
 
-        await interaction.channel.send({ embeds: [embed] });
+      await interaction.channel.send({ embeds: [embed] });
 
-        await interaction.update({
-          content: '送信が完了しました',
-          embeds: [],
-          components: [],
-        });
-      }
+      await interaction.update({
+        content: '送信が完了しました',
+        embeds: [],
+        components: [],
+      });
     }
+  },
 };
