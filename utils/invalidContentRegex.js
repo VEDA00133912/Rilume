@@ -1,5 +1,3 @@
-// data/invalidContentRegex.js
-
 module.exports = [
   {
     regex: /@everyone|@here/,
