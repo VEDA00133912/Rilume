@@ -22,9 +22,11 @@
     "discord.js": "^14.21.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "kuromoji": "^0.1.2",
     "makeitaquote": "^8.0.1",
     "mongoose": "^8.17.0",
     "node-cron": "^4.2.1",
+    "wanakana": "^5.3.1",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
