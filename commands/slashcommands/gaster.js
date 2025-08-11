@@ -16,7 +16,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName('text')
-        .setDescription('変換したいテキスト(※日本語非対応)')
+        .setDescription('変換したいテキスト')
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(200),
