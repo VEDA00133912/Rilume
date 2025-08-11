@@ -58,6 +58,7 @@ module.exports = {
 
     if (name.endsWith('.mcz')) {
       const extractResult = await extractMCZWithExtras(fileBuffer, interaction);
+
       mcContent = extractResult.mcContent;
       originalFilename = extractResult.mcFilename;
 
@@ -68,10 +69,14 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
+      const tjaFilename = path
+        .basename(originalFilename)
+        .replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
+      attachments.push(
+        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
+      );
 
       if (extractResult.otherFiles.length > 0) {
         const zip = new AdmZip();
@@ -82,12 +87,16 @@ module.exports = {
           zip.addFile(file.filename, file.buffer);
         }
 
-        const zipFilename = path.basename(attachment.name, path.extname(attachment.name)) + '_tja.zip';
+        const zipFilename =
+          path.basename(attachment.name, path.extname(attachment.name)) +
+          '_tja.zip';
         const zipFilePath = path.join(TEMP_DIR, zipFilename);
 
         zip.writeZip(zipFilePath);
 
-        attachments = [new AttachmentBuilder(zipFilePath, { name: zipFilename })];
+        attachments = [
+          new AttachmentBuilder(zipFilePath, { name: zipFilename }),
+        ];
 
         setTimeout(() => {
           if (fs.existsSync(tjaFilePath)) fs.unlinkSync(tjaFilePath);
@@ -109,10 +118,14 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
+      const tjaFilename = path
+        .basename(originalFilename)
+        .replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
+      attachments.push(
+        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
+      );
 
       setTimeout(() => {
         if (fs.existsSync(tjaFilePath)) fs.unlinkSync(tjaFilePath);
@@ -123,7 +136,12 @@ module.exports = {
       ? `${attachment.name} → ${path.basename(attachments[0].name)}`
       : attachment.name;
 
-    const embed = createFileInfoEmbed(interaction.client, mcReader, converter, footerText);
+    const embed = createFileInfoEmbed(
+      interaction.client,
+      mcReader,
+      converter,
+      footerText,
+    );
 
     await interaction.editReply({
       content: '変換が完了しました！',
@@ -145,13 +163,17 @@ async function extractMCZWithExtras(buffer, interaction) {
   await interaction.editReply({ content: 'MCZファイルを展開中...' });
   const zip = new AdmZip(buffer);
 
-  const mcEntry = zip.getEntries().find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
+  const mcEntry = zip
+    .getEntries()
+    .find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
+
   if (!mcEntry) throw new Error('.mcファイルが見つかりませんでした。');
 
   const mcContent = mcEntry.getData().toString('utf8');
   const mcFilename = mcEntry.entryName;
 
-  const otherFiles = zip.getEntries()
+  const otherFiles = zip
+    .getEntries()
     .filter((e) => !e.isDirectory && e.entryName !== mcFilename)
     .map((e) => ({
       filename: path.basename(e.entryName),
@@ -164,7 +186,9 @@ async function extractMCZWithExtras(buffer, interaction) {
 function writeTempTJA(filename, content) {
   if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
   const filePath = path.join(TEMP_DIR, filename);
+
   fs.writeFileSync(filePath, content, 'utf8');
+
   return filePath;
 }
 
@@ -173,24 +197,20 @@ function replyError(interaction, message) {
 }
 
 function createFileInfoEmbed(client, mcReader, converter, footer) {
-  const courseNames = ['かんたん', 'ふつう', 'むずかしい', 'おに'];
-  let course = 'おに',
-    level = 10;
+  let course = 'おに';
+  let level = 10;
 
   try {
+    console.log(mcReader);
     const version = mcReader.meta?.version;
 
     if (version) {
-      const courseIndex = converter.getCourseFromName(version);
-      const levelNum = converter.getLevelFromName(version);
+      course = converter.getCourseFromName('command', version);
 
-      if (courseIndex >= 0 && courseIndex < courseNames.length)
-        course = courseNames[courseIndex];
-      if (levelNum > 0)
-        level = converter.getStarFromCourseLevel(courseIndex, levelNum);
+      level = converter.getStarFromVersionText(version);
     }
   } catch (e) {
-    console.error('Error getting file info:', e);
+    console.error('Error getting file info:', e.message);
   }
 
   const fileInfo = {
