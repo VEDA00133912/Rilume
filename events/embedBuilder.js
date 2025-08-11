@@ -71,6 +71,7 @@ module.exports = {
     }
 
     if (interaction.isButton()) {
+      if (!interaction.customId.startsWith('embedConfirm:')) return;
       const embed = interaction.message.embeds[0];
 
       await interaction.channel.send({ embeds: [embed] });
