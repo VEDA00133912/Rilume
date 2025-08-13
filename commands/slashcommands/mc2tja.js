@@ -201,7 +201,6 @@ function createFileInfoEmbed(client, mcReader, converter, footer) {
   let level = 10;
 
   try {
-    console.log(mcReader);
     const version = mcReader.meta?.version;
 
     if (version) {

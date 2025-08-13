@@ -35,6 +35,6 @@ module.exports = async function deployCommands(client) {
       `Successfully reloaded ${commands.length} application (/) commands.`,
     );
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
 };
