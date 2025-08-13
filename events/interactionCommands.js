@@ -61,7 +61,7 @@ module.exports = {
             });
           }
         } catch (err) {
-          console.error('Failed to send error reply:', err);
+          console.error('Failed to send error reply:', err.message);
         }
       }
     } else if (interaction.isContextMenuCommand()) {

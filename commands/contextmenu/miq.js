@@ -46,7 +46,7 @@ module.exports = {
 
     const embed = createEmbed(interaction, {
       description: `**[元メッセージへ飛ぶ🕊️](${targetMessage.url})**`,
-      image: { url: `attachment://${fileName}` },
+      image: `attachment://${fileName}`,
     });
 
     await interaction.editReply({ embeds: [embed], files: [attachment] });

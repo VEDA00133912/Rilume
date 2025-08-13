@@ -25,13 +25,15 @@ module.exports = {
       .setCustomId('embedTitle')
       .setLabel('タイトルを設定')
       .setStyle(TextInputStyle.Short)
-      .setRequired(true);
+      .setRequired(true)
+      .setMaxLength(50);
 
     const descInput = new TextInputBuilder()
       .setCustomId('embedDescription')
       .setLabel('内容を設定')
       .setStyle(TextInputStyle.Paragraph)
-      .setRequired(true);
+      .setRequired(true)
+      .setMaxLength(400);
 
     const colorInput = new TextInputBuilder()
       .setCustomId('embedColor')
@@ -45,7 +47,9 @@ module.exports = {
       .setCustomId('embedFooter')
       .setLabel('フッターを設定')
       .setStyle(TextInputStyle.Short)
-      .setRequired(false);
+      .setRequired(false)
+      .setMinLength(1)
+      .setMaxLength(50);
 
     modal.addComponents(
       new ActionRowBuilder().addComponents(titleInput),

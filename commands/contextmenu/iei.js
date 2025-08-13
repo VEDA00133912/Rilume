@@ -1,5 +1,6 @@
 const {
-  SlashCommandBuilder,
+  ContextMenuCommandBuilder,
+  ApplicationCommandType,
   InteractionContextType,
   ApplicationIntegrationType,
   AttachmentBuilder,
@@ -11,15 +12,10 @@ const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
   cooldown: 10,
-  data: new SlashCommandBuilder()
-    .setName('iei')
-    .setDescription('遺影画像を生成します')
-    .addUserOption((option) =>
-      option
-        .setName('target')
-        .setDescription('遺影にするユーザー')
-        .setRequired(false),
-    )
+  data: new ContextMenuCommandBuilder()
+    .setName('遺影画像を生成')
+    .setType(ApplicationCommandType.User)
+    .setDefaultMemberPermissions()
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
@@ -29,7 +25,15 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const user = interaction.options.getUser('target') || interaction.user;
+    const user = interaction.targetUser;
+    if (!user) {
+          await interaction.reply({
+            content: 'ユーザーが見つかりませんでした',
+            flags: MessageFlags.Ephemeral,
+          });
+    
+          return;
+        }
     const avatarUrl = user.displayAvatarURL({ extension: 'png', size: 512, forceStatic: true });
     const avatarBuffer = await downloadImage(avatarUrl);
 

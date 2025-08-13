@@ -35,9 +35,10 @@ module.exports = {
     }
 
     const embed = createEmbed(interaction, {
-      description: `**${userMention(user.id)} のアイコン**`,
-      image: { url: user.displayAvatarURL({ size: 2048, forceStatic: false }) },
-    });
+  description: `**${userMention(user.id)} のアイコン**`,
+  image: user.displayAvatarURL({ size: 2048, forceStatic: false }),
+});
+
 
     await interaction.reply({ embeds: [embed] });
   },
