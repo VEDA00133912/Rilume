@@ -37,7 +37,7 @@ module.exports = {
     }
 
     const icon = user.displayAvatarURL({ size: 2048, forceStatic: false });
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: `**${userMention(user.id)} のアイコン**`,
       image: icon,
     });

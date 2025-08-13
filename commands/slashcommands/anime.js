@@ -22,7 +22,7 @@ module.exports = {
 
     if (result) {
       const link = `${SYOBOI_URL}${result.id}`;
-      const embed = createEmbed(interaction.client, {
+      const embed = createEmbed(interaction, {
         title: 'アニメを取得しました！',
         description: `タイトル: **${result.title}**\n🔗 [リンク](${link})`,
         footer: 'Powered by しょぼいカレンダー',

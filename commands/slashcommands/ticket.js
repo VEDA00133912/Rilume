@@ -33,7 +33,7 @@ module.exports = {
       .setStyle(ButtonStyle.Primary)
       .setLabel('作成');
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description:
         'チケットチャンネルを作成するときは下のボタンを押してください',
     });

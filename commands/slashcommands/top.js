@@ -41,12 +41,12 @@ module.exports = {
     if (!msg) {
       return interaction.reply({
         content:
-          '<:error:1302169165905526805> メッセージが見つかりませんでした。',
-        ephemeral: true,
+          'メッセージが見つかりませんでした',
+        flags: MessageFlags.Ephemeral,
       });
     }
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       author: {
         name: `${msg.author.displayName || msg.author.username} (${msg.author.username})`,
         iconURL: msg.author.displayAvatarURL(),

@@ -41,7 +41,7 @@ module.exports = {
       () => Math.floor(Math.random() * max) + 1,
     );
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: `🎲 ${count}d${max} Results`,
       description: `**${results.join(', ')}**`,
     });

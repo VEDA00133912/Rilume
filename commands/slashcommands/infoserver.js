@@ -17,7 +17,7 @@ module.exports = {
   async execute(interaction) {
     const info = await getServerInfo(interaction.guild);
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: info.title,
       fields: info.fields,
       thumbnail: info.thumbnail,

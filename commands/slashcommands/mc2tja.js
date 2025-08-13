@@ -137,7 +137,7 @@ module.exports = {
       : attachment.name;
 
     const embed = createFileInfoEmbed(
-      interaction.client,
+      interaction,
       mcReader,
       converter,
       footerText,

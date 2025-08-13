@@ -39,7 +39,7 @@ module.exports = {
     const bottomText = interaction.options.getString('bottom');
 
     const response = `${gosenChoyen_API_URL}?top=${encodeURIComponent(topText)}&bottom=${encodeURIComponent(bottomText)}&type=png`;
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       image: response,
     });
 

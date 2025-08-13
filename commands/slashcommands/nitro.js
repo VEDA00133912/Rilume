@@ -6,6 +6,7 @@ const {
 } = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const { generatNitroCode } = require('../../lib/generate/nitro');
+const wait = require('../../utils/wait')
 
 module.exports = {
   cooldown: 10,
@@ -36,7 +37,7 @@ module.exports = {
     const type = interaction.options.getString('type');
     const count = interaction.options.getInteger('count');
 
-    const prepareEmbed = createEmbed(interaction.client, {
+    const prepareEmbed = createEmbed(interaction, {
       title: 'Nitroリンク生成中',
       description: `タイプ: ${type}\n生成数: ${count}`,
       color: '#de98f1',
@@ -46,10 +47,10 @@ module.exports = {
       embeds: [prepareEmbed],
       flags: MessageFlags.Ephemeral,
     });
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // 1秒待機
+    await wait(1000) // 1秒待機
     const nitroLinks = generatNitroCode(type, count);
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: `**生成が完了しました**\n${nitroLinks.join('\n')}`,
       color: '#de98f1',
       footer: 'このコードは実際に使えるものではありません',

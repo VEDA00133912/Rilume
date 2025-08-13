@@ -77,7 +77,7 @@ module.exports = {
         .setStyle(ButtonStyle.Danger)
         .setLabel('削除');
 
-      const embed = createEmbed(interaction.client, {
+      const embed = createEmbed(interaction, {
         description:
           'チケットチャンネルを作成しました。\n削除するときは下のボタンを押してください',
         color: Colors.Red,

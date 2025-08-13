@@ -37,7 +37,9 @@ module.exports = {
       .setCustomId('embedColor')
       .setLabel('色を設定 (例: #FF0000)')
       .setStyle(TextInputStyle.Short)
-      .setRequired(false);
+      .setRequired(false)
+      .setMinLength(7)
+      .setMaxLength(7);
 
     const footerInput = new TextInputBuilder()
       .setCustomId('embedFooter')

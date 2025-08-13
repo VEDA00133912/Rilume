@@ -44,7 +44,7 @@ module.exports = {
     if (messages.size === 0) {
       return interaction.editReply({
         embeds: [
-          createEmbed(interaction.client, {
+          createEmbed(interaction, {
             title: '削除できるメッセージがありません',
             description:
               '削除対象が存在しないか、14日以上前のメッセージのため削除できませんでした',
@@ -59,7 +59,7 @@ module.exports = {
         ? `${messages.size} 件のメッセージを削除しました（指定: ${count} 件）\n※一部のメッセージは14日以上経過しているため削除できませんでした`
         : `${messages.size} 件のメッセージを削除しました`;
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: 'メッセージ削除完了',
       description,
       color: Colors.Green,

@@ -18,7 +18,7 @@ module.exports = {
     const user = interaction.options.getUser('target') || interaction.user;
     const info = await getUserInfo(interaction.guild, user);
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: info.title,
       fields: info.fields,
       thumbnail: info.thumbnail,

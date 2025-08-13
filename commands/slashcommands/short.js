@@ -40,7 +40,7 @@ module.exports = {
 
     if (!API_KEY) {
       return await interaction.editReply(
-        'x.gdのAPIキーが設定されていません。管理者(ryo_001339)へ連絡してください',
+        'x.gdのAPIキーが設定されていません。管理者(ryo393939)へ連絡してください',
       );
     }
 
@@ -65,7 +65,7 @@ module.exports = {
 
     const shortUrl = data.shorturl;
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: 'URL短縮結果',
       description: shortUrl,
       fields: [{ name: '元のURL', value: originalUrl }],

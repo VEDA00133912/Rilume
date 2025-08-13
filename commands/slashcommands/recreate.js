@@ -8,6 +8,7 @@ const {
 } = require('discord.js');
 const { recreateChannel } = require('../../lib/recreate/channel');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
+const wait = require('../../utils/wait')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,7 +26,6 @@ module.exports = {
 
   async execute(interaction) {
     const targetChannel = interaction.options.getChannel('channel');
-
     const requiredPermissions = [PermissionFlagsBits.ManageChannels];
 
     if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
@@ -34,6 +34,9 @@ module.exports = {
       content: `チャンネル ${channelMention(targetChannel.id)} の再作成を開始します…`,
       flags: MessageFlags.Ephemeral,
     });
+
+    // 1秒待つ
+    await wait(1000);
 
     await recreateChannel(targetChannel, interaction.user);
   },

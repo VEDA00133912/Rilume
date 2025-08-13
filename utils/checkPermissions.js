@@ -73,7 +73,7 @@ async function checkBotPermissions(interaction, requiredPermissions) {
 
     await interaction.reply({
       embeds: [
-        createEmbed(interaction.client, {
+        createEmbed(interaction, {
           title: '権限が不足しています',
           description: `Bot に以下の権限がありません\n\`\`\`\n・${missingNames.join('\n・')}\n\`\`\``,
           color: Colors.Red,

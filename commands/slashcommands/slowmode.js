@@ -67,12 +67,12 @@ module.exports = {
     let embed;
 
     if (seconds === 0) {
-      embed = createEmbed(interaction.client, {
+      embed = createEmbed(interaction, {
         description: '低速モードを解除しました',
         color: Colors.Green,
       });
     } else {
-      embed = createEmbed(interaction.client, {
+      embed = createEmbed(interaction, {
         title: '低速モードの設定が完了しました',
         description: `低速モードを${seconds}秒に設定しました`,
         color: Colors.Green,

@@ -30,7 +30,7 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
-        .setName('target_language')
+        .setName('language')
         .setDescription('翻訳先の言語を選んでください')
         .setRequired(true)
         .addChoices(
@@ -48,7 +48,7 @@ module.exports = {
     await interaction.deferReply();
 
     const text = interaction.options.getString('text');
-    const targetLanguage = interaction.options.getString('target_language');
+    const targetLanguage = interaction.options.getString('language');
 
     if (!text) {
       return interaction.editReply({ content: 'テキストが指定されていません' });
@@ -61,11 +61,11 @@ module.exports = {
     }
 
     const translatedText = await translator(text, '', targetLanguage);
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: '翻訳が完了しました！',
       fields: [
-        { name: '元のテキスト', value: text },
-        { name: `翻訳後のテキスト: ${targetLanguage}`, value: translatedText },
+        { name: 'ja', value: text },
+        { name: `${targetLanguage}`, value: translatedText },
       ],
     });
 

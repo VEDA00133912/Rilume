@@ -44,7 +44,7 @@ module.exports = {
     const fileName = `miq-${targetMessage.id}.png`;
     const attachment = new AttachmentBuilder(response, { name: fileName });
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: `**[元メッセージへ飛ぶ🕊️](${targetMessage.url})**`,
       image: { url: `attachment://${fileName}` },
     });

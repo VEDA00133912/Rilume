@@ -20,7 +20,7 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: '以下のリンクからBotを導入できます',
       fields: [
         {

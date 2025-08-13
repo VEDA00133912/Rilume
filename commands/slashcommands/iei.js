@@ -36,7 +36,7 @@ module.exports = {
     const image = await generateIeiImage(avatarBuffer);
     const attachment = new AttachmentBuilder(image, { name: 'iei.png' });
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: `${userMention(user.id)}が死亡しました`,
       image: 'attachment://iei.png',
       footer: `${user.username} died...💀`,

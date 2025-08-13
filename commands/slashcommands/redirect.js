@@ -32,7 +32,7 @@ module.exports = {
     const redirectResult = await trackRedirects(url);
 
     if (redirectResult.error) {
-      const errorEmbed = createEmbed(interaction.client, {
+      const errorEmbed = createEmbed(interaction, {
         title: 'リダイレクト追跡失敗',
         description: `❌ ${redirectResult.error}`,
         color: Colors.Red,
@@ -41,7 +41,7 @@ module.exports = {
       return await interaction.editReply({ embeds: [errorEmbed] });
     }
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       fields: redirectResult.map((item, index) => ({
         name: `リダイレクト先 ${index + 1}`,
         value: item.url || '不明なURL',

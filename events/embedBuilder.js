@@ -49,7 +49,7 @@ module.exports = {
         color = undefined; // createEmbed のデフォルトカラーを使う
       }
 
-      const previewEmbed = createEmbed(interaction.client, {
+      const previewEmbed = createEmbed(interaction, {
         title,
         description,
         footer,

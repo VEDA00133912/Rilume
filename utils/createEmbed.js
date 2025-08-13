@@ -1,10 +1,16 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 
 function createEmbed(
-  client,
+  interactionOrClient,
   { title, description, fields, color, image, thumbnail, author, footer } = {},
 ) {
   const embed = new EmbedBuilder();
+  const client = interactionOrClient?.client ?? interactionOrClient;
+  const isInteraction = !!interactionOrClient?.commandName;
+  let commandName = '';
+  if (isInteraction) {
+    commandName = `/${interactionOrClient.commandName}`;
+  }
 
   if (title) embed.setTitle(title);
   if (description) embed.setDescription(description);
@@ -31,7 +37,11 @@ function createEmbed(
   }
 
   embed.setFooter({
-    text: footer || client.user.displayName,
+    text: footer
+      ? `${footer}${isInteraction ? ` | ${commandName}` : ''}`
+      : isInteraction
+      ? `${client.user.displayName} | ${commandName}`
+      : client.user.displayName,
     iconURL: client.user.displayAvatarURL() || undefined,
   });
 

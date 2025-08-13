@@ -43,7 +43,7 @@ module.exports = {
 
     const translated = response.data?.translation ?? '翻訳結果が見つかりません';
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       fields: [
         { name: '入力テキスト', value: inputText },
         { name: 'おじさん構文', value: translated },

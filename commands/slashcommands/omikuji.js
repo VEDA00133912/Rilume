@@ -46,7 +46,7 @@ module.exports = {
 
     await Omikuji.create({ userId, date: new Date() });
 
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       description: `あなたは今日は **${result.label}** です！`,
       image: `attachment://${result.name}.png`,
     });

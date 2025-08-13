@@ -39,7 +39,7 @@ module.exports = {
     }
 
     const runeText = await specialTranslator('rune', text);
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: 'ルーン文字への変換が完了しました！',
       fields: [
         { name: '元のテキスト', value: text },

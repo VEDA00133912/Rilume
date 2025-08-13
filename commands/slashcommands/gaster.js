@@ -40,7 +40,7 @@ module.exports = {
     }
 
     const gasterText = await specialTranslator('gaster', text);
-    const embed = createEmbed(interaction.client, {
+    const embed = createEmbed(interaction, {
       title: 'ガスター文字への変換が完了しました！',
       fields: [
         { name: '元のテキスト', value: text },
