@@ -1,8 +1,6 @@
 .env
 node_modules
 package-lock.json
-temp
-commands/ojisan.js
 .prettierignore
 .prettierrc
 eslint.config.mjs
