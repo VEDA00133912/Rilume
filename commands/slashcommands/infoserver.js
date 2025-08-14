@@ -3,7 +3,7 @@ const {
   InteractionContextType,
   ApplicationIntegrationType,
 } = require('discord.js');
-const getServerInfo = require('../../utils/getServerInfo');
+const getServerInfo = require('../../lib/info/getServerInfo');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
