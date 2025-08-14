@@ -17,12 +17,15 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
+
     const zipFilePath = await createEmoZip(interaction.guild);
 
     if (!zipFilePath) {
-      return await interaction.editReply(
-        '絵文字のZIPファイルの生成に失敗しました',
-      );
+      return await interaction.editReply('zipファイルの生成に失敗しました');
+    }
+
+    if (typeof zipFilePath === 'string' && zipFilePath.includes('絵文字がありません')) {
+      return await interaction.editReply(zipFilePath);
     }
 
     const attachment = {
@@ -35,7 +38,7 @@ module.exports = {
     };
 
     await interaction.editReply({
-      content: `サーバー内の絵文字をZIPファイルにまとめました。以下からダウンロードできます`,
+      content: 'サーバー内の絵文字をZIPファイルにまとめました。以下からダウンロードできます',
       ...attachment,
     });
   },
