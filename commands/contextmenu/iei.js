@@ -4,6 +4,7 @@ const {
   InteractionContextType,
   ApplicationIntegrationType,
   AttachmentBuilder,
+  MessageFlags,
   userMention,
 } = require('discord.js');
 const { generateIeiImage } = require('../../lib/iei/generateIei');
@@ -26,15 +27,21 @@ module.exports = {
     await interaction.deferReply();
 
     const user = interaction.targetUser;
+
     if (!user) {
-          await interaction.reply({
-            content: 'ユーザーが見つかりませんでした',
-            flags: MessageFlags.Ephemeral,
-          });
-    
-          return;
-        }
-    const avatarUrl = user.displayAvatarURL({ extension: 'png', size: 512, forceStatic: true });
+      await interaction.reply({
+        content: 'ユーザーが見つかりませんでした',
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
+    const avatarUrl = user.displayAvatarURL({
+      extension: 'png',
+      size: 512,
+      forceStatic: true,
+    });
     const avatarBuffer = await downloadImage(avatarUrl);
 
     const image = await generateIeiImage(avatarBuffer);

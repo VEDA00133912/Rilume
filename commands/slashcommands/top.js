@@ -40,8 +40,7 @@ module.exports = {
 
     if (!msg) {
       return interaction.reply({
-        content:
-          'メッセージが見つかりませんでした',
+        content: 'メッセージが見つかりませんでした',
         flags: MessageFlags.Ephemeral,
       });
     }

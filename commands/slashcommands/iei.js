@@ -30,7 +30,11 @@ module.exports = {
     await interaction.deferReply();
 
     const user = interaction.options.getUser('target') || interaction.user;
-    const avatarUrl = user.displayAvatarURL({ extension: 'png', size: 512, forceStatic: true });
+    const avatarUrl = user.displayAvatarURL({
+      extension: 'png',
+      size: 512,
+      forceStatic: true,
+    });
     const avatarBuffer = await downloadImage(avatarUrl);
 
     const image = await generateIeiImage(avatarBuffer);

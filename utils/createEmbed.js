@@ -8,6 +8,7 @@ function createEmbed(
   const client = interactionOrClient?.client ?? interactionOrClient;
   const isInteraction = !!interactionOrClient?.commandName;
   let commandName = '';
+
   if (isInteraction) {
     commandName = `/${interactionOrClient.commandName}`;
   }
@@ -40,8 +41,8 @@ function createEmbed(
     text: footer
       ? `${footer}${isInteraction ? ` | ${commandName}` : ''}`
       : isInteraction
-      ? `${client.user.displayName} | ${commandName}`
-      : client.user.displayName,
+        ? `${client.user.displayName} | ${commandName}`
+        : client.user.displayName,
     iconURL: client.user.displayAvatarURL() || undefined,
   });
 

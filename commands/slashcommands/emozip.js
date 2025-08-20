@@ -24,7 +24,10 @@ module.exports = {
       return await interaction.editReply('zipファイルの生成に失敗しました');
     }
 
-    if (typeof zipFilePath === 'string' && zipFilePath.includes('絵文字がありません')) {
+    if (
+      typeof zipFilePath === 'string' &&
+      zipFilePath.includes('絵文字がありません')
+    ) {
       return await interaction.editReply(zipFilePath);
     }
 
@@ -38,7 +41,8 @@ module.exports = {
     };
 
     await interaction.editReply({
-      content: 'サーバー内の絵文字をZIPファイルにまとめました。以下からダウンロードできます',
+      content:
+        'サーバー内の絵文字をZIPファイルにまとめました。以下からダウンロードできます',
       ...attachment,
     });
   },
