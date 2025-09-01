@@ -4,12 +4,9 @@ const {
   ApplicationIntegrationType,
   MessageFlags,
 } = require('discord.js');
-const axios = require('axios');
 const { createEmbed } = require('../../utils/createEmbed');
-const API_KEY = process.env.XGD_API_KEY;
-const XGD_API_URL = 'https://xgd.io/V1/shorten';
+const { shortenUrl } = require('../../lib/url/urlShortener');
 
-// URLの検証関数
 function isValidUrl(string) {
   try {
     new URL(string);
@@ -23,12 +20,23 @@ function isValidUrl(string) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('short')
-    .setDescription('URLを短縮します(x.gd使用)')
+    .setDescription('URLを短縮します')
     .addStringOption((option) =>
       option
         .setName('url')
         .setDescription('短縮したいURLを入力してください')
         .setRequired(true),
+    )
+    .addStringOption((option) =>
+      option
+        .setName('service')
+        .setDescription('使用する短縮サービスを選択')
+        .setRequired(false)
+        .addChoices(
+          { name: 'x.gd', value: 'xgd' },
+          { name: 'is.gd', value: 'isgd' },
+          { name: 'CleanURI', value: 'cleanuri' },
+        ),
     )
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
@@ -36,41 +44,23 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const originalUrl = interaction.options.getString('url');
+    const url = interaction.options.getString('url');
+    const service = interaction.options.getString('service') || 'xgd';
 
-    if (!API_KEY) {
-      return await interaction.editReply(
-        'x.gdのAPIキーが設定されていません。管理者(ryo393939)へ連絡してください',
-      );
+    if (!isValidUrl(url))
+      return interaction.editReply('有効なURLを入力してください');
+
+    try {
+      const shortUrl = await shortenUrl(url, service);
+      const embed = createEmbed(interaction, {
+        description: shortUrl,
+        fields: [{ name: '元のURL', value: url }],
+      });
+
+      await interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err.message);
+      await interaction.editReply(err.message);
     }
-
-    if (!isValidUrl(originalUrl)) {
-      return await interaction.editReply('有効なURLを入力してください。');
-    }
-
-    const response = await axios.get(XGD_API_URL, {
-      params: {
-        url: originalUrl,
-        key: API_KEY,
-      },
-    });
-
-    const data = response.data;
-
-    if (data.status !== 200) {
-      return await interaction.editReply(
-        `URL短縮に失敗しました: ${data.message || '不明なエラー'}`,
-      );
-    }
-
-    const shortUrl = data.shorturl;
-
-    const embed = createEmbed(interaction, {
-      title: 'URL短縮結果',
-      description: shortUrl,
-      fields: [{ name: '元のURL', value: originalUrl }],
-    });
-
-    await interaction.editReply({ embeds: [embed] });
   },
 };

@@ -2,7 +2,6 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
-const express = require('express');
 
 const TOKEN = process.env.TOKEN;
 
@@ -52,16 +51,3 @@ for (const file of eventFiles) {
 }
 
 client.login(TOKEN);
-
-// Expressサーバーの設定
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Express server is running on http://localhost:${PORT}`);
-});
