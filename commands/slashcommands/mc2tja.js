@@ -1,18 +1,14 @@
-const {
-  SlashCommandBuilder,
-  InteractionContextType,
-  ApplicationIntegrationType,
-  AttachmentBuilder,
-} = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const crypto = require('node:crypto');
+const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const AdmZip = require('adm-zip');
 const { MCReader } = require('../../lib/mc2tja/mcreader');
 const { mc2tja } = require('../../lib/mc2tja/mc2tja');
 const { createEmbed } = require('../../utils/createEmbed');
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
-const TEMP_DIR = path.join(__dirname, '..', '..', 'temp');
 
 module.exports = {
   cooldown: 10,
@@ -20,21 +16,15 @@ module.exports = {
     .setName('mc2tja')
     .setDescription('MC・MCZ(Malodyの譜面ファイル)をTJAに変換します')
     .addAttachmentOption((option) =>
-      option
-        .setName('file')
-        .setDescription('変換するMCまたはMCZファイル')
-        .setRequired(true),
-    )
-    .setContexts([InteractionContextType.Guild])
-    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
+      option.setName('file').setDescription('変換するMCまたはMCZファイル').setRequired(true),
+    ),
 
   async execute(interaction) {
     await interaction.deferReply();
 
     const attachment = interaction.options.getAttachment('file');
 
-    if (!attachment)
-      return replyError(interaction, 'ファイルが添付されていません');
+    if (!attachment) return replyError(interaction, 'ファイルが添付されていません');
 
     const name = attachment.name.toLowerCase();
 
@@ -42,10 +32,7 @@ module.exports = {
       return replyError(interaction, '.mcまたは.mczファイルのみ対応しています');
 
     if (attachment.size > MAX_FILE_SIZE) {
-      return replyError(
-        interaction,
-        '8MB以下のファイルをアップロードしてください',
-      );
+      return replyError(interaction, '8MB以下のファイルをアップロードしてください');
     }
 
     await interaction.editReply({ content: 'ファイルをダウンロード中...' });
@@ -69,14 +56,10 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path
-        .basename(originalFilename)
-        .replace(/\.mc$/i, '.tja');
+      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(
-        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
-      );
+      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
 
       if (extractResult.otherFiles.length > 0) {
         const zip = new AdmZip();
@@ -87,25 +70,21 @@ module.exports = {
           zip.addFile(file.filename, file.buffer);
         }
 
-        const zipFilename =
-          path.basename(attachment.name, path.extname(attachment.name)) +
-          '_tja.zip';
-        const zipFilePath = path.join(TEMP_DIR, zipFilename);
+        // ユニークなzipファイルパス
+        const uniqueId = crypto.randomUUID();
+        const zipFilename = `${path.basename(attachment.name, path.extname(attachment.name))}_${uniqueId}_tja.zip`;
+        const zipFilePath = path.join(os.tmpdir(), zipFilename);
 
         zip.writeZip(zipFilePath);
 
-        attachments = [
-          new AttachmentBuilder(zipFilePath, { name: zipFilename }),
-        ];
+        attachments = [new AttachmentBuilder(zipFilePath, { name: zipFilename })];
 
         setTimeout(() => {
-          if (fs.existsSync(tjaFilePath)) fs.unlinkSync(tjaFilePath);
-          if (fs.existsSync(zipFilePath)) fs.unlinkSync(zipFilePath);
+          safeUnlink(tjaFilePath);
+          safeUnlink(zipFilePath);
         }, 5000);
       } else {
-        setTimeout(() => {
-          if (fs.existsSync(tjaFilePath)) fs.unlinkSync(tjaFilePath);
-        }, 5000);
+        setTimeout(() => safeUnlink(tjaFilePath), 5000);
       }
     } else {
       mcContent = fileBuffer.toString('utf8');
@@ -118,30 +97,19 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path
-        .basename(originalFilename)
-        .replace(/\.mc$/i, '.tja');
+      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(
-        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
-      );
+      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
 
-      setTimeout(() => {
-        if (fs.existsSync(tjaFilePath)) fs.unlinkSync(tjaFilePath);
-      }, 5000);
+      setTimeout(() => safeUnlink(tjaFilePath), 5000);
     }
 
     const footerText = name.endsWith('.mcz')
       ? `${attachment.name} → ${path.basename(attachments[0].name)}`
       : attachment.name;
 
-    const embed = createFileInfoEmbed(
-      interaction,
-      mcReader,
-      converter,
-      footerText,
-    );
+    const embed = createFileInfoEmbed(interaction, mcReader, converter, footerText);
 
     await interaction.editReply({
       content: '変換が完了しました！',
@@ -153,9 +121,7 @@ module.exports = {
 
 async function downloadFile(url) {
   const res = await fetch(url);
-
   if (!res.ok) throw new Error(`Download failed: ${res.statusText}`);
-
   return Buffer.from(await res.arrayBuffer());
 }
 
@@ -163,9 +129,7 @@ async function extractMCZWithExtras(buffer, interaction) {
   await interaction.editReply({ content: 'MCZファイルを展開中...' });
   const zip = new AdmZip(buffer);
 
-  const mcEntry = zip
-    .getEntries()
-    .find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
+  const mcEntry = zip.getEntries().find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
 
   if (!mcEntry) throw new Error('.mcファイルが見つかりませんでした。');
 
@@ -184,12 +148,18 @@ async function extractMCZWithExtras(buffer, interaction) {
 }
 
 function writeTempTJA(filename, content) {
-  if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
-  const filePath = path.join(TEMP_DIR, filename);
-
+  const uniqueId = crypto.randomUUID();
+  const filePath = path.join(os.tmpdir(), `${uniqueId}_${filename}`);
   fs.writeFileSync(filePath, content, 'utf8');
-
   return filePath;
+}
+
+function safeUnlink(filePath) {
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch (err) {
+    console.error('Temp file deletion failed:', err.message);
+  }
 }
 
 function replyError(interaction, message) {
@@ -202,10 +172,8 @@ function createFileInfoEmbed(client, mcReader, converter, footer) {
 
   try {
     const version = mcReader.meta?.version;
-
     if (version) {
       course = converter.getCourseFromName('command', version);
-
       level = converter.getStarFromVersionText(version);
     }
   } catch (e) {
@@ -225,11 +193,7 @@ function createFileInfoEmbed(client, mcReader, converter, footer) {
     fields: [
       { name: '楽曲名', value: fileInfo.title },
       { name: 'アーティスト名', value: fileInfo.artist },
-      {
-        name: '難易度',
-        value: `${fileInfo.course} (${fileInfo.level}★)`,
-        inline: true,
-      },
+      { name: '難易度', value: `${fileInfo.course} (${fileInfo.level}★)`, inline: true },
       { name: 'BPM', value: String(fileInfo.bpm), inline: true },
       { name: 'ノーツ数', value: String(fileInfo.noteCount), inline: true },
     ],

@@ -13,7 +13,7 @@ const { checkBotPermissions } = require('../../utils/checkPermissions');
 module.exports = {
   cooldown: 60,
   data: new SlashCommandBuilder()
-    .setName('tikcet')
+    .setName('ticket')
     .setDescription('チケットを作成します')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .setContexts([InteractionContextType.Guild])

@@ -1,5 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
+const crypto = require('node:crypto');
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const otoware = require('../../lib/audio/otoware');
 
@@ -15,12 +17,12 @@ module.exports = {
     await interaction.deferReply();
 
     const attachment = interaction.options.getAttachment('file');
-    const allowedExts = ['.mp3', '.ogg', '.m4a', '.wav'];
+    const allowedExts = ['.mp3', '.ogg', '.wav'];
     const fileInfo = path.parse(attachment.name);
 
     if (!allowedExts.includes(fileInfo.ext.toLowerCase())) {
       return interaction.editReply(
-        '対応しているファイル形式は MP3, OGG, M4A, WAV です',
+        '対応しているファイル形式は MP3, OGG, WAV です',
       );
     }
 
@@ -30,25 +32,29 @@ module.exports = {
 
     const wavBuffer = await otoware(buffer, 20);
 
-    const tempDir = path.join(__dirname, '../../temp');
-
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-    const outPath = path.join(tempDir, `${fileInfo.name}_distort.wav`);
+    // OSの一時ディレクトリに保存（ユニークなファイル名を生成）
+    const tempDir = os.tmpdir();
+    const uniqueId = crypto.randomUUID();
+    const outPath = path.join(tempDir, `${fileInfo.name}_${uniqueId}_distort.wav`);
 
     fs.writeFileSync(outPath, Buffer.from(wavBuffer));
 
-    const file = new AttachmentBuilder(outPath);
+    const file = new AttachmentBuilder(outPath, {
+      name: `${fileInfo.name}_distort.wav`, // ユーザーに見えるファイル名
+    });
 
     await interaction.editReply({
       content: '音割れ完了しました',
       files: [file],
     });
 
-    try {
-      fs.unlinkSync(outPath);
-    } catch (err) {
-      console.error('Temp file deletion failed:', err.message);
-    }
+    // 少し待ってから削除
+    setTimeout(() => {
+      try {
+        if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
+      } catch (err) {
+        console.error('Temp file deletion failed:', err.message);
+      }
+    }, 5000);
   },
 };
