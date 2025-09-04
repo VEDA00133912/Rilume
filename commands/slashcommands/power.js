@@ -2,6 +2,7 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { power } = require('../../lib/calc/power');
 
 module.exports = {
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('power')
     .setDescription('累乗計算を行います')

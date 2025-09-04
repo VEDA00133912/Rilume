@@ -10,7 +10,7 @@ const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
-  cooldown: 5,
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('delete')
     .setDescription('指定したメッセージを削除します')

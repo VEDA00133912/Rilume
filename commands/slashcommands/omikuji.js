@@ -9,6 +9,7 @@ const Omikuji = require('../../models/omikuji');
 const { drawOmikuji } = require('../../lib/omikuji/drawOmikuji');
 
 module.exports = {
+  cooldown: 60,
   data: new SlashCommandBuilder()
     .setName('omikuji')
     .setDescription('今日のおみくじを引きます（一日一回まで）')

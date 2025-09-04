@@ -10,7 +10,7 @@ const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
-  cooldown: 5,
+  cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('top')
     .setDescription('このチャンネルの一番最初のメッセージを表示します')

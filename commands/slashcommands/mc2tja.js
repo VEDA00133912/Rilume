@@ -11,12 +11,15 @@ const { createEmbed } = require('../../utils/createEmbed');
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 module.exports = {
-  cooldown: 10,
+  cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('mc2tja')
     .setDescription('MC・MCZ(Malodyの譜面ファイル)をTJAに変換します')
     .addAttachmentOption((option) =>
-      option.setName('file').setDescription('変換するMCまたはMCZファイル').setRequired(true),
+      option
+        .setName('file')
+        .setDescription('変換するMCまたはMCZファイル')
+        .setRequired(true),
     ),
 
   async execute(interaction) {
@@ -24,7 +27,8 @@ module.exports = {
 
     const attachment = interaction.options.getAttachment('file');
 
-    if (!attachment) return replyError(interaction, 'ファイルが添付されていません');
+    if (!attachment)
+      return replyError(interaction, 'ファイルが添付されていません');
 
     const name = attachment.name.toLowerCase();
 
@@ -32,7 +36,10 @@ module.exports = {
       return replyError(interaction, '.mcまたは.mczファイルのみ対応しています');
 
     if (attachment.size > MAX_FILE_SIZE) {
-      return replyError(interaction, '8MB以下のファイルをアップロードしてください');
+      return replyError(
+        interaction,
+        '8MB以下のファイルをアップロードしてください',
+      );
     }
 
     await interaction.editReply({ content: 'ファイルをダウンロード中...' });
@@ -56,10 +63,14 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
+      const tjaFilename = path
+        .basename(originalFilename)
+        .replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
+      attachments.push(
+        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
+      );
 
       if (extractResult.otherFiles.length > 0) {
         const zip = new AdmZip();
@@ -77,7 +88,9 @@ module.exports = {
 
         zip.writeZip(zipFilePath);
 
-        attachments = [new AttachmentBuilder(zipFilePath, { name: zipFilename })];
+        attachments = [
+          new AttachmentBuilder(zipFilePath, { name: zipFilename }),
+        ];
 
         setTimeout(() => {
           safeUnlink(tjaFilePath);
@@ -97,10 +110,14 @@ module.exports = {
         return replyError(interaction, '変換に失敗しました');
       }
 
-      const tjaFilename = path.basename(originalFilename).replace(/\.mc$/i, '.tja');
+      const tjaFilename = path
+        .basename(originalFilename)
+        .replace(/\.mc$/i, '.tja');
       const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
 
-      attachments.push(new AttachmentBuilder(tjaFilePath, { name: tjaFilename }));
+      attachments.push(
+        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
+      );
 
       setTimeout(() => safeUnlink(tjaFilePath), 5000);
     }
@@ -109,7 +126,12 @@ module.exports = {
       ? `${attachment.name} → ${path.basename(attachments[0].name)}`
       : attachment.name;
 
-    const embed = createFileInfoEmbed(interaction, mcReader, converter, footerText);
+    const embed = createFileInfoEmbed(
+      interaction,
+      mcReader,
+      converter,
+      footerText,
+    );
 
     await interaction.editReply({
       content: '変換が完了しました！',
@@ -129,7 +151,9 @@ async function extractMCZWithExtras(buffer, interaction) {
   await interaction.editReply({ content: 'MCZファイルを展開中...' });
   const zip = new AdmZip(buffer);
 
-  const mcEntry = zip.getEntries().find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
+  const mcEntry = zip
+    .getEntries()
+    .find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
 
   if (!mcEntry) throw new Error('.mcファイルが見つかりませんでした。');
 
@@ -193,7 +217,11 @@ function createFileInfoEmbed(client, mcReader, converter, footer) {
     fields: [
       { name: '楽曲名', value: fileInfo.title },
       { name: 'アーティスト名', value: fileInfo.artist },
-      { name: '難易度', value: `${fileInfo.course} (${fileInfo.level}★)`, inline: true },
+      {
+        name: '難易度',
+        value: `${fileInfo.course} (${fileInfo.level}★)`,
+        inline: true,
+      },
       { name: 'BPM', value: String(fileInfo.bpm), inline: true },
       { name: 'ノーツ数', value: String(fileInfo.noteCount), inline: true },
     ],

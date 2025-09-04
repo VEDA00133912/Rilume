@@ -39,9 +39,9 @@ function createEmbed(
 
   embed.setFooter({
     text: footer
-      ? `${footer}${isInteraction ? ` | ${commandName}` : ''}`
+      ? `${footer}${isInteraction ? `  ${commandName}` : ''}`
       : isInteraction
-        ? `${client.user.displayName} | ${commandName}`
+        ? `${client.user.displayName}  ${commandName}`
         : client.user.displayName,
     iconURL: client.user.displayAvatarURL() || undefined,
   });

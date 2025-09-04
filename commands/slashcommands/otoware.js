@@ -6,6 +6,7 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const otoware = require('../../lib/audio/otoware');
 
 module.exports = {
+  cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('otoware')
     .setDescription('音声ファイルを音割れさせます')
@@ -35,7 +36,10 @@ module.exports = {
     // OSの一時ディレクトリに保存（ユニークなファイル名を生成）
     const tempDir = os.tmpdir();
     const uniqueId = crypto.randomUUID();
-    const outPath = path.join(tempDir, `${fileInfo.name}_${uniqueId}_distort.wav`);
+    const outPath = path.join(
+      tempDir,
+      `${fileInfo.name}_${uniqueId}_distort.wav`,
+    );
 
     fs.writeFileSync(outPath, Buffer.from(wavBuffer));
 

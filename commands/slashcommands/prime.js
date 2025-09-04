@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const { isPrime } = require('../../lib/calc/prime');
 
 module.exports = {
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('prime')
     .setDescription('素数かどうか判定します')

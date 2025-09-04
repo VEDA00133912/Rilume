@@ -18,6 +18,7 @@ function isValidUrl(string) {
 }
 
 module.exports = {
+  cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('short')
     .setDescription('URLを短縮します')

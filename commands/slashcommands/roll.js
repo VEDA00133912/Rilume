@@ -9,7 +9,7 @@ const { createEmbed } = require('../../utils/createEmbed');
 module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('dice')
+    .setName('roll')
     .setDescription(
       '多面ダイスを振ります(数指定無しの場合普通の6面サイコロです)',
     )

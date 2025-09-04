@@ -8,6 +8,7 @@ const homo = require('../../lib/calc/homo.js');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
+  cooldown:  5,
   data: new SlashCommandBuilder()
     .setName('114514')
     .setDescription('数値を「114514」だけになるように変換します')
