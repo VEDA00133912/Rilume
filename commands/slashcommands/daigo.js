@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  AttachmentBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { getWavBuffer } = require('../../lib/audio/coefont');
 
 module.exports = {
@@ -13,7 +18,9 @@ module.exports = {
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(200),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
   async execute(interaction) {
     const text = interaction.options.getString('text');
 

@@ -2,7 +2,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  AttachmentBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const otoware = require('../../lib/audio/otoware');
 
 module.exports = {
@@ -12,7 +17,9 @@ module.exports = {
     .setDescription('音声ファイルを音割れさせます')
     .addAttachmentOption((option) =>
       option.setName('file').setDescription('音声ファイル').setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply();

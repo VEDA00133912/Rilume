@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  MessageFlags,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const QR_API_URL = 'https://api.qrserver.com/v1/create-qr-code/';
 
@@ -13,7 +18,7 @@ function isValidUrl(string) {
 }
 
 module.exports = {
-    cooldown: 5,
+  cooldown: 5,
   data: new SlashCommandBuilder()
     .setName('qrcode')
     .setDescription('指定したURLからQRコードを生成します')
@@ -22,12 +27,20 @@ module.exports = {
         .setName('url')
         .setDescription('QRコード化するURL')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     const url = interaction.options.getString('url');
     if (!isValidUrl(url))
-      return interaction.reply({ content: '有効なURLを指定してください', flags: MessageFlags.Ephemeral });
+      return interaction.reply({
+        content: '有効なURLを指定してください',
+        flags: MessageFlags.Ephemeral,
+      });
 
     const apiUrl = `${QR_API_URL}?data=${encodeURIComponent(
       url,

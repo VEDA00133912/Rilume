@@ -1,4 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { isPrime } = require('../../lib/calc/prime');
 
 module.exports = {
@@ -13,7 +17,9 @@ module.exports = {
         .setRequired(true)
         .setMinValue(1)
         .setMaxValue(9000000000000000),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
   async execute(interaction) {
     await interaction.deferReply();
 

@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  AttachmentBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { power } = require('../../lib/calc/power');
 
 module.exports = {
@@ -21,7 +26,9 @@ module.exports = {
         .setRequired(true)
         .setMinValue(1)
         .setMaxValue(9000000000000000),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
   async execute(interaction) {
     await interaction.deferReply();
 
