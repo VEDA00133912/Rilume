@@ -15,6 +15,7 @@ module.exports = {
     .setIntegrationTypes(ApplicationIntegrationType.GuildInstall),
 
   async execute(interaction) {
+    await interaction.deferReply();
     const info = await getServerInfo(interaction.guild);
 
     const embed = createEmbed(interaction, {
@@ -24,6 +25,6 @@ module.exports = {
       color: info.color,
     });
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   },
 };

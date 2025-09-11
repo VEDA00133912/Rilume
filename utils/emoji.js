@@ -1,4 +1,4 @@
-const badgeEmojis = {
+const Emojis = {
   ACTIVE_DEVELOPER: '<:active_developer_badge:1413765917304684656>',
   HOUSE_BRAVERY: '<:hypesquad_bravery:1413765944974508103>',
   HOUSE_BRILLIANCE: '<:hypesquad_brilliance:1413765956617900122>',
@@ -29,13 +29,43 @@ const badgeEmojis = {
   LOCK: '<:securityactions:1413765726422175754>',
   UNLOCK: '<:securityactions_cansel:1413765741538181160>',
   POLLS: '<:polls:1413765623284240454>',
+
   BOOST_LV1: '<:1levelboost:1413765773423280279>',
   BOOST_LV2: '<:2levelboost:1413765783502458941>',
   BOOST_LV3: '<:3levelboost:1413765797633065000>',
+  BOOST_1: '<:1boost:1414052111100153906>',
+  NONE_BOOST: '<:none_boost:1414051781880844409>',
+  USER: '<:user:1414048103228510328>',
+  BOT: '<:bot:1414048092000354425>',
+  BAN: '<:ban:1414049464028758056>',
+  EMOJI: '<:emoji:1414049477945331723>',
+  CHANNEL: '<:channel:1414049509570515046>',
+  ID: '<:id:1414049492562608147>',
+  SETTING: '<:setting:1414049454436384850>',
+  BIRTHDAY: '<:birthday:1414050526940762143>',
+
+  TWITTER: '<:twitter:1415551185980756170>',
+  SEARCH: '<:search:1415550439671468053>',
+  GHOST: '<:ghost:1415550424534220912>',
+  REPLY: '<:reply:1415550413704396940>',
+  SUGGEST: '<:suggest:1415550400995659806>',
 };
 
 function getBadgeEmojis(flagsArray = []) {
-  return flagsArray.map(flag => badgeEmojis[flag] || null).filter(Boolean);
+  return flagsArray.map(flag => Emojis[flag] || null).filter(Boolean);
 }
 
-module.exports = { getBadgeEmojis };
+
+function getServerEmoji(key, boostCount = null) {
+  if (key === 'BOOST') {
+  if (boostCount >= 14) return Emojis.BOOST_LV3;
+  if (boostCount >= 6) return Emojis.BOOST_LV2;
+  if (boostCount >= 2) return Emojis.BOOST_LV1;
+  if (boostCount === 1) return Emojis.BOOST_1;
+  if (boostCount === 0) return Emojis.NONE_BOOST;
+  return null;
+  }
+  return Emojis[key] || null;
+}
+
+module.exports = { getBadgeEmojis, getServerEmoji };
