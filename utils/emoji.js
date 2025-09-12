@@ -3,7 +3,8 @@ const Emojis = {
   HOUSE_BRAVERY: '<:hypesquad_bravery:1413765944974508103>',
   HOUSE_BRILLIANCE: '<:hypesquad_brilliance:1413765956617900122>',
   HOUSE_BALANCE: '<:hypesquad_balance:1413765931330572400>',
-  EARLY_VERIFIED_DEVELOPER: '<:early_verified_bot_developer:1413766026184622131>',
+  EARLY_VERIFIED_DEVELOPER:
+    '<:early_verified_bot_developer:1413766026184622131>',
   PARTNERED_SERVER_OWNER: '<:partnered_server_owner:1413766013291597854>',
   HYPESQUAD_EVENTS: '<:hypesquad_events:1413765969158864956>',
   BUGHUNTER_LEVEL_1: '<:bug_hunter_lv1:1413766079502614548>',
@@ -15,7 +16,8 @@ const Emojis = {
   NITRO: '<:nitro:1413766055167393872>',
   LEGACY_NAME: '<:legacy_name:1413765901748146276>',
   CERTIFIED_MODERATOR: '<:certified_moderator:1413765998313607210>',
-  DISCORD_CERTIFIED_MODERATOR: '<:moderator_programs_alumni:1413765984229261416>',
+  DISCORD_CERTIFIED_MODERATOR:
+    '<:moderator_programs_alumni:1413765984229261416>',
   VERIFIED_DARK: '<:verified_dark:1413775708727148625>',
   ONLINE: '<:online:1413765808475345008>',
   IDLE: '<:idle:1413765833628319764>',
@@ -52,18 +54,17 @@ const Emojis = {
 };
 
 function getBadgeEmojis(flagsArray = []) {
-  return flagsArray.map(flag => Emojis[flag] || null).filter(Boolean);
+  return flagsArray.map((flag) => Emojis[flag] || null).filter(Boolean);
 }
-
 
 function getServerEmoji(key, boostCount = null) {
   if (key === 'BOOST') {
-  if (boostCount >= 14) return Emojis.BOOST_LV3;
-  if (boostCount >= 6) return Emojis.BOOST_LV2;
-  if (boostCount >= 2) return Emojis.BOOST_LV1;
-  if (boostCount === 1) return Emojis.BOOST_1;
-  if (boostCount === 0) return Emojis.NONE_BOOST;
-  return null;
+    if (boostCount >= 14) return Emojis.BOOST_LV3;
+    if (boostCount >= 6) return Emojis.BOOST_LV2;
+    if (boostCount >= 2) return Emojis.BOOST_LV1;
+    if (boostCount === 1) return Emojis.BOOST_1;
+    if (boostCount === 0) return Emojis.NONE_BOOST;
+    return null;
   }
   return Emojis[key] || null;
 }

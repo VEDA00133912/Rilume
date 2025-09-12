@@ -1,4 +1,10 @@
-const { SlashCommandBuilder, Colors, MessageFlags, ApplicationIntegrationType, InteractionContextType } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  Colors,
+  MessageFlags,
+  ApplicationIntegrationType,
+  InteractionContextType,
+} = require('discord.js');
 const axios = require('axios');
 const { createEmbed } = require('../../utils/createEmbed');
 const { getServerEmoji } = require('../../utils/emoji');
@@ -9,15 +15,23 @@ module.exports = {
   cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('shadowban')
-    .setDescription('指定したTwitterアカウントがシャドウバンされているかチェックします')
-    .addStringOption(option =>
+    .setDescription(
+      '指定したTwitterアカウントがシャドウバンされているかチェックします',
+    )
+    .addStringOption((option) =>
       option
         .setName('username')
         .setDescription('Twitterのユーザー名(@なしで)')
         .setRequired(true),
     )
-    .setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
-    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall]),
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+    ])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -47,11 +61,31 @@ module.exports = {
       thumbnail: user.profile_image_url_https,
       color: Colors.Blue,
       fields: [
-        { name: `${getServerEmoji('TWITTER')} Followers`, value: user.followers_count.toString(), inline: true },
-        { name: `${getServerEmoji('SEARCH')} Search Ban (検索結果で非表示)`, value: data.search_ban ? 'Yes' : 'No', inline: true },
-        { name: `${getServerEmoji('SUGGEST')} Suggestion Ban (検索順位低下)`, value: data.search_suggestion_ban ? 'Yes' : 'No', inline: true },
-        { name: `${getServerEmoji('GHOST')} Ghost Ban (TLやリプで非表示)`, value: data.ghost_ban ? 'Yes' : 'No', inline: true },
-        { name: `${getServerEmoji('REPLY')} Reply Deboosting (リプ非表示)`, value: data.reply_deboosting ? 'Yes' : 'No', inline: true },
+        {
+          name: `${getServerEmoji('TWITTER')} Followers`,
+          value: user.followers_count.toString(),
+          inline: true,
+        },
+        {
+          name: `${getServerEmoji('SEARCH')} Search Ban (検索結果で非表示)`,
+          value: data.search_ban ? 'Yes' : 'No',
+          inline: true,
+        },
+        {
+          name: `${getServerEmoji('SUGGEST')} Suggestion Ban (検索順位低下)`,
+          value: data.search_suggestion_ban ? 'Yes' : 'No',
+          inline: true,
+        },
+        {
+          name: `${getServerEmoji('GHOST')} Ghost Ban (TLやリプで非表示)`,
+          value: data.ghost_ban ? 'Yes' : 'No',
+          inline: true,
+        },
+        {
+          name: `${getServerEmoji('REPLY')} Reply Deboosting (リプ非表示)`,
+          value: data.reply_deboosting ? 'Yes' : 'No',
+          inline: true,
+        },
       ],
     });
 

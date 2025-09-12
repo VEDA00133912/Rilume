@@ -2,7 +2,17 @@ const { EmbedBuilder, Colors } = require('discord.js');
 
 function createEmbed(
   interactionOrClient,
-  { title, url, description, fields, color, image, thumbnail, author, footer } = {},
+  {
+    title,
+    url,
+    description,
+    fields,
+    color,
+    image,
+    thumbnail,
+    author,
+    footer,
+  } = {},
 ) {
   const embed = new EmbedBuilder();
   const client = interactionOrClient?.client ?? interactionOrClient;
