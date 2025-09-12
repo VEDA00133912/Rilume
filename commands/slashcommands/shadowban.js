@@ -6,6 +6,7 @@ const { getServerEmoji } = require('../../utils/emoji');
 const shadowbanAPI_URL = 'https://shadowban.lami.zip/api/test';
 
 module.exports = {
+  cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('shadowban')
     .setDescription('指定したTwitterアカウントがシャドウバンされているかチェックします')
