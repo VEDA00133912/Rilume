@@ -5,14 +5,14 @@ const {
   MessageFlags,
   PermissionFlagsBits,
 } = require('discord.js');
-const Expand = require('../../models/expandGuild');
+const Impersonate = require('../../models/ImpersonateGuild');
 
 module.exports = {
   cooldown: 60,
   data: new SlashCommandBuilder()
-    .setName('expand')
-    .setDescription('メッセージリンク自動展開の設定')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .setName('setting-impersonate')
+    .setDescription('webhookを使用するimpersonateコマンドの設定')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageWebhooks)
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .addStringOption((option) =>
@@ -21,8 +21,8 @@ module.exports = {
         .setDescription('設定のオンオフを指定(デフォルトON)')
         .setRequired(true)
         .addChoices(
-          { name: '自動展開ON', value: 'true' },
-          { name: '自動展開OFF', value: 'false' },
+          { name: 'impersonateコマンドON', value: 'true' },
+          { name: 'impersonateコマンドOFF', value: 'false' },
         ),
     ),
 
@@ -31,24 +31,25 @@ module.exports = {
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    let settings = await Expand.findOne({ guildId: interaction.guild.id });
+    let settings = await Impersonate.findOne({ guildId: interaction.guild.id });
 
     if (!settings) {
-      settings = new Expand({
+      settings = new Impersonate({
         guildId: interaction.guild.id,
-        expand: status,
+        impersonate: status,
       });
-    } else if (settings.expand === status) {
+      await settings.save();
+    } else if (settings.impersonate === status) {
       return interaction.editReply(
         `すでにこのサーバーの設定は**${status ? 'ON' : 'OFF'}**になっています`,
       );
+    } else {
+      settings.impersonate = status;
+      await settings.save();
     }
 
-    settings.expand = status;
-    await settings.save();
-
     await interaction.editReply(
-      `メッセージリンクの展開機能が**${status ? 'ON' : 'OFF'}**に設定されました`,
+      `impersonateコマンドが**${status ? 'ON' : 'OFF'}**に設定されました`,
     );
   },
 };

@@ -36,6 +36,7 @@ module.exports = {
 
   async execute(interaction) {
     const url = interaction.options.getString('url');
+
     if (!isValidUrl(url))
       return interaction.reply({
         content: '有効なURLを指定してください',

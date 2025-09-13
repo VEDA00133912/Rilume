@@ -64,8 +64,10 @@ function getServerEmoji(key, boostCount = null) {
     if (boostCount >= 2) return Emojis.BOOST_LV1;
     if (boostCount === 1) return Emojis.BOOST_1;
     if (boostCount === 0) return Emojis.NONE_BOOST;
+
     return null;
   }
+
   return Emojis[key] || null;
 }
 

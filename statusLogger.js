@@ -15,6 +15,7 @@ async function logStatus(client) {
 
 function scheduleLogging(client) {
   const rule = new schedule.RecurrenceRule();
+
   rule.minute = [0, 30];
   rule.tz = 'Asia/Tokyo';
 

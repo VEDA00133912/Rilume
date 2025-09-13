@@ -143,7 +143,9 @@ module.exports = {
 
 async function downloadFile(url) {
   const res = await fetch(url);
+
   if (!res.ok) throw new Error(`Download failed: ${res.statusText}`);
+
   return Buffer.from(await res.arrayBuffer());
 }
 
@@ -174,7 +176,9 @@ async function extractMCZWithExtras(buffer, interaction) {
 function writeTempTJA(filename, content) {
   const uniqueId = crypto.randomUUID();
   const filePath = path.join(os.tmpdir(), `${uniqueId}_${filename}`);
+
   fs.writeFileSync(filePath, content, 'utf8');
+
   return filePath;
 }
 
@@ -196,6 +200,7 @@ function createFileInfoEmbed(client, mcReader, converter, footer) {
 
   try {
     const version = mcReader.meta?.version;
+
     if (version) {
       course = converter.getCourseFromName('command', version);
       level = converter.getStarFromVersionText(version);
