@@ -17,10 +17,11 @@ function createEmbed(
   const embed = new EmbedBuilder();
   const client = interactionOrClient?.client ?? interactionOrClient;
   const isInteraction = !!interactionOrClient?.commandName;
-  let commandName = '';
 
+  let commandName = '';
   if (isInteraction) {
-    commandName = `/${interactionOrClient.commandName}`;
+    const sub = interactionOrClient.options.getSubcommand(false);
+    commandName = `/${interactionOrClient.commandName}${sub ? ` ${sub}` : ''}`;
   }
 
   if (title) embed.setTitle(title);
@@ -49,12 +50,8 @@ function createEmbed(
   }
 
   embed.setFooter({
-    text: footer
-      ? `${footer}${isInteraction ? `  ${commandName}` : ''}`
-      : isInteraction
-        ? `${client.user.displayName}  ${commandName}`
-        : client.user.displayName,
-    iconURL: client.user.displayAvatarURL() || undefined,
+    text: `${client.user.displayName}${isInteraction ? `  ${commandName}` : ''}`,
+    iconURL: footer?.iconURL || client.user.displayAvatarURL() || undefined,
   });
 
   embed.setColor(color || Colors.Aqua);
