@@ -12,4 +12,4 @@ const omikujiSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Omikuji', omikujiSchema);
+module.exports = mongoose.model('Omikujis', omikujiSchema);

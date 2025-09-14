@@ -20,7 +20,7 @@ const timerSchema = new mongoose.Schema({
   },
 });
 
-const Timer = mongoose.model('Timer', timerSchema);
+const Timer = mongoose.model('Timers', timerSchema);
 
 module.exports = {
   Timer,

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const impersonateSchema = new mongoose.Schema({
+const impersonateGuildsSchema = new mongoose.Schema({
   guildId: {
     type: String,
     required: true,
@@ -10,6 +10,10 @@ const impersonateSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  channelId: {
+    type: String,
+    default: null,
+  },
 });
 
-module.exports = mongoose.model('ImpersonateGuild', impersonateSchema);
+module.exports = mongoose.model('ImpersonateGuilds', impersonateGuildsSchema);

@@ -12,4 +12,4 @@ const expandSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Expand', expandSchema);
+module.exports = mongoose.model('Expands', expandSchema);
