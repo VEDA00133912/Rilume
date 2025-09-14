@@ -32,14 +32,18 @@ module.exports = {
     .addBooleanOption((option) =>
       option
         .setName('create-channel')
-        .setDescription('専用チャンネルを新しく作成しますか？(YES=true, NO=false)'),
+        .setDescription(
+          '専用チャンネルを新しく作成しますか？(YES=true, NO=false)',
+        ),
     ),
 
   async execute(interaction) {
     const onOffOption = interaction.options.getString('on-off');
-    const createChannelOption = interaction.options.getBoolean('create-channel') ?? false;
+    const createChannelOption =
+      interaction.options.getBoolean('create-channel') ?? false;
 
     let status;
+
     if (onOffOption === 'true') {
       status = true;
     } else if (onOffOption === 'false') {
@@ -62,7 +66,8 @@ module.exports = {
       });
       await settings.save();
     } else if (settings.impersonate === status && !shouldCreateChannel) {
-     console.log(settings.impersonate)
+      console.log(settings.impersonate);
+
       return interaction.editReply(
         `すでにこのサーバーの設定は**${status ? 'ON' : 'OFF'}**になっています`,
       );
@@ -72,20 +77,30 @@ module.exports = {
     }
 
     let channelMsg = '';
+
     if (shouldCreateChannel) {
       if (settings.channelId) {
         channelMsg = `\n既存の専用チャンネル ${channelMention(settings.channelId)}`;
       } else {
         try {
-          const webhooks = await Webhook.find({ guildId: interaction.guild.id });
+          const webhooks = await Webhook.find({
+            guildId: interaction.guild.id,
+          });
+
           for (const wh of webhooks) {
             try {
-              const channel = await interaction.guild.channels.fetch(wh.channelId).catch(() => null);
+              const channel = await interaction.guild.channels
+                .fetch(wh.channelId)
+                .catch(() => null);
+
               if (channel) {
                 const fetched = await channel.fetchWebhooks().catch(() => null);
                 const webhook = fetched?.get(wh.webhookId);
-                if (webhook) await webhook.delete('専用チャンネル作成のため削除');
+
+                if (webhook)
+                  await webhook.delete('専用チャンネル作成のため削除');
               }
+
               await Webhook.deleteOne({ _id: wh._id });
             } catch (err) {
               console.warn(`Webhook削除失敗: ${wh.webhookId}`, err);

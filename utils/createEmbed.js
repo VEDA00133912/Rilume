@@ -19,8 +19,10 @@ function createEmbed(
   const isInteraction = !!interactionOrClient?.commandName;
 
   let commandName = '';
+
   if (isInteraction) {
     const sub = interactionOrClient.options.getSubcommand(false);
+
     commandName = `/${interactionOrClient.commandName}${sub ? ` ${sub}` : ''}`;
   }
 
