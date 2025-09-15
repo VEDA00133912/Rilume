@@ -3,6 +3,8 @@ const {
   Colors,
   EmbedBuilder,
   AttachmentBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
 } = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const taikoLib = require('../../lib/random/taiko');
@@ -14,6 +16,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('random')
     .setDescription('ランダム選曲コマンド')
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ])
     .addSubcommand((sub) =>
       sub
         .setName('taiko')

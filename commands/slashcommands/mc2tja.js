@@ -2,7 +2,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  AttachmentBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const AdmZip = require('adm-zip');
 const { MCReader } = require('../../lib/mc2tja/mcreader');
 const { mc2tja } = require('../../lib/mc2tja/mc2tja');
@@ -20,7 +25,9 @@ module.exports = {
         .setName('file')
         .setDescription('変換するMCまたはMCZファイル')
         .setRequired(true),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
     await interaction.deferReply();

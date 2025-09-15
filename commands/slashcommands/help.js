@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, MessageFlags, InteractionContextType, ApplicationIntegrationType } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  MessageFlags,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
@@ -6,8 +11,15 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
     .setDescription('BOTの情報とサポートリンク等を表示します')
-    .setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel, InteractionContextType.BotDM])
-    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall]),
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+      InteractionContextType.BotDM,
+    ])
+    .setIntegrationTypes([
+      ApplicationIntegrationType.GuildInstall,
+      ApplicationIntegrationType.UserInstall,
+    ]),
 
   async execute(interaction) {
     const client = interaction.client;
@@ -39,7 +51,8 @@ module.exports = {
         },
         {
           name: '設定用コマンド',
-          value: '**/setting-impersonate** webhook関連の設定\n**/setting-expand** メッセージ自動展開の設定',
+          value:
+            '**/setting-impersonate** webhook関連の設定\n**/setting-expand** メッセージ自動展開の設定',
         },
       ],
     });

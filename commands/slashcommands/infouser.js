@@ -1,4 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  InteractionContextType,
+  ApplicationIntegrationType,
+} = require('discord.js');
 const getUserInfo = require('../../lib/info/getUserInfo');
 const { createEmbed } = require('../../utils/createEmbed');
 
@@ -12,7 +16,9 @@ module.exports = {
         .setName('target')
         .setDescription('情報を取得するユーザー')
         .setRequired(false),
-    ),
+    )
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes(ApplicationIntegrationType.GuildInstall),
 
   async execute(interaction) {
     const user = interaction.options.getUser('target') || interaction.user;
