@@ -45,6 +45,14 @@ const Emojis = {
   ID: '<:id:1414049492562608147>',
   SETTING: '<:setting:1414049454436384850>',
   BIRTHDAY: '<:birthday:1414050526940762143>',
+  RAID: '<:report_raid:1417056045892632586>',
+  PEN: '<:edit:1417056301590122536>',
+  PIN_NEW: '<:pin_new:1415551194683244552>',
+  THREAD: '<:thread:1417056550027268166>',
+  COMMANDS: '<:slashcommands:1417056080374136873>',
+  AUTOMOD: '<:automod:1417058899311202385>',
+  STAGE: '<:stage:1417056054683893820>',
+  STAGE_END: '<:stage_end:1417056064960073779>',
 
   TWITTER: '<:twitter:1415551185980756170>',
   SEARCH: '<:search:1415550439671468053>',
@@ -71,4 +79,4 @@ function getServerEmoji(key, boostCount = null) {
   return Emojis[key] || null;
 }
 
-module.exports = { getBadgeEmojis, getServerEmoji };
+module.exports = { getBadgeEmojis, getServerEmoji, Emojis };

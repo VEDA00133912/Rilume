@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, ChannelType } = require('discord.js');
 const { createEmbed } = require('../utils/createEmbed');
 const {
   getMessageTypeDescription,
@@ -13,6 +13,7 @@ module.exports = {
     if (message.author.bot) return;
 
     if (!message.guild) return;
+    if (message.channel.type !== ChannelType.GuildText) return;
 
     const settings = await Expand.findOne({ guildId: message.guild.id });
 

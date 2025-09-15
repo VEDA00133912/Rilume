@@ -1,64 +1,62 @@
 const { MessageType } = require('discord.js');
+const { Emojis } = require('./emoji.js');
 
-const specialTypes = new Set([
-  MessageType.GuildBoostTier1,
-  MessageType.GuildBoostTier2,
-  MessageType.GuildBoostTier3,
-  MessageType.GuildBoost,
-  MessageType.ChannelFollowAdd,
-  MessageType.AutoModerationAction,
-  MessageType.ChannelPinnedMessage,
-  MessageType.PollResult,
-  MessageType.UserJoin,
-  MessageType.StageStart,
-  MessageType.StageEnd,
-]);
-
-/**
- * メッセージタイプや内容に応じて説明文を返す
- * @param {import('discord.js').Message} msg
- * @param {string} url 元メッセージのURL
- * @returns {string|null} 説明文（該当しなければnull）
- */
 function getMessageTypeDescription(msg, url) {
-  if (specialTypes.has(msg.type)) {
-    switch (msg.type) {
-      case MessageType.GuildBoostTier1:
-        return `🚀 ギルドブースト Tier 1 のメッセージです: ${url}`;
-      case MessageType.GuildBoostTier2:
-        return `🚀 ギルドブースト Tier 2 のメッセージです: ${url}`;
-      case MessageType.GuildBoostTier3:
-        return `🚀 ギルドブースト Tier 3 のメッセージです: ${url}`;
-      case MessageType.GuildBoost:
-        return `🚀 ギルドブーストのメッセージです: ${url}`;
-      case MessageType.ChannelFollowAdd:
-        return `🔗 チャンネルフォロー追加のメッセージです: ${url}`;
-      case MessageType.AutoModerationAction:
-        return `🤖 自動モデレーションのアクションメッセージです: ${url}`;
-      case MessageType.ChannelPinnedMessage:
-        return `📌 チャンネルのピン留めメッセージです: ${url}`;
-      case MessageType.PollResult:
-        return `📊 投票結果のメッセージです: ${url}`;
-      case MessageType.UserJoin:
-        return `👤 ユーザー参加メッセージです: ${url}`;
-      case MessageType.StageStart:
-        return `🎤 ステージ開始メッセージです: ${url}`;
-      case MessageType.StageEnd:
-        return `🎤 ステージ終了メッセージです: ${url}`;
-      default:
-        return `特殊なメッセージです: ${url}`;
-    }
-  }
+  console.log(Emojis.USER);
+  switch (msg.type) {
+    case MessageType.Default:
+      return null;
 
-  if (msg.embeds.length > 0) {
-    return `🖼 このメッセージには埋め込みが含まれています: ${url}`;
-  }
+    case MessageType.ChannelNameChange:
+      return `${Emojis.PEN} チャンネル名が変更されました`;
+    case MessageType.ChannelPinnedMessage:
+      return `${Emojis.PIN_NEW} メッセージがピン留めされました`;
 
-  if (msg.poll) {
-    return `📊 このメッセージは投票です: ${url}`;
-  }
+    case MessageType.UserJoin:
+      return `${Emojis.NEW_MEMBER} ユーザーがサーバーに参加しました`;
+    case MessageType.GuildBoost:
+      return `${Emojis.BOOST_1} サーバーがブーストされました`;
+    case MessageType.GuildBoostTier1:
+      return `${Emojis.BOOST_LV1} サーバーがlv.1 に到達しました`;
+    case MessageType.GuildBoostTier2:
+      return `${Emojis.BOOST_LV2} サーバーがlv.2 に到達しました`;
+    case MessageType.GuildBoostTier3:
+      return `${Emojis.BOOST_LV3} サーバーがlv.3 に到達しました`;
 
-  return null;
+    case MessageType.ChannelFollowAdd:
+      return `${Emojis.CHANNEL} フォローチャンネルが追加されました`;
+    case MessageType.ThreadCreated:
+      return `${Emojis.THREAD} スレッドが作成されました`;
+    case MessageType.ChatInputCommand:
+      return `${Emojis.COMMANDS} スラッシュコマンドです`;
+    case MessageType.ContextMenuCommand:
+      return `${Emojis.COMMANDS} コンテキストメニューコマンドです`;
+
+    case MessageType.AutoModerationAction:
+      return `${Emojis.AUTOMOD} Automodの実行メッセージ`;
+    case MessageType.StageStart:
+      return `${Emojis.STAGE} ステージが開始されました`;
+    case MessageType.StageEnd:
+      return `${Emojis.STAGE_END} ステージが終了しました`;
+    case MessageType.PollResult:
+      return `${Emojis.POLLS} 終了した投票です`;
+
+    case MessageType.GuildIncidentAlertModeEnabled:
+      return `${Emojis.LOCK} セキュリティ措置が有効化されました`;
+    case MessageType.GuildIncidentAlertModeDisabled:
+      return `${Emojis.UNLOCK} セキュリティ措置が無効化されました`;
+    case MessageType.GuildIncidentReportRaid:
+      return `${Emojis.RAID} レイド報告メッセージです`;
+
+    default:
+      if (msg.embeds.length > 0) {
+        return `${Emojis.EMOJI} 埋め込みです`;
+      }
+      if (msg.poll) {
+        return `${Emojis.POLLS} 投票です`;
+      }
+      return `${Emojis.SEARCH} 特殊なメッセージです`;
+  }
 }
 
 module.exports = { getMessageTypeDescription };
