@@ -10,6 +10,7 @@ const {
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
+  cooldown: 30,
   data: new SlashCommandBuilder()
     .setName('follow-announce')
     .setDescription('りょうんち製作所からのお知らせチャンネルを作成します')
