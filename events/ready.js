@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { resumeTimers } = require('../lib/timer/setTimer');
 const deployCommands = require('../deploy-commands');
 const { scheduleLogging, logStatus } = require('../statusLogger');
+const { startStatusRotation } = require('../utils/status');
 const MONGODB_URI = process.env.MONGODB_URI;
 
 module.exports = {
@@ -11,6 +12,8 @@ module.exports = {
   async execute(client) {
     await deployCommands(client);
     console.log(`Ready! Logged in as ${client.user.tag}`);
+    startStatusRotation(client);
+    console.log('Activity and status settings complete!');
 
     try {
       await mongoose.connect(MONGODB_URI);
@@ -18,7 +21,6 @@ module.exports = {
 
       require('../lib/omikuji/resetOmikuji');
       await resumeTimers(client);
-
       await logStatus(client);
       scheduleLogging(client);
     } catch (error) {
