@@ -1,7 +1,7 @@
 const { MessageType } = require('discord.js');
 const { Emojis } = require('./emoji.js');
 
-function getMessageTypeDescription(msg, url) {
+function getMessageTypeDescription(msg) {
   console.log(Emojis.USER);
   switch (msg.type) {
     case MessageType.Default:
@@ -52,9 +52,11 @@ function getMessageTypeDescription(msg, url) {
       if (msg.embeds.length > 0) {
         return `${Emojis.EMOJI} 埋め込みです`;
       }
+
       if (msg.poll) {
         return `${Emojis.POLLS} 投票です`;
       }
+
       return `${Emojis.SEARCH} 特殊なメッセージです`;
   }
 }

@@ -46,6 +46,7 @@ module.exports = {
     const isDisabled =
       settings &&
       (settings.impersonate === false || settings.impersonate === 'false');
+
     if (isDisabled) {
       return interaction.editReply(
         'このサーバーでは impersonate コマンドは無効になっています',
@@ -53,6 +54,7 @@ module.exports = {
     }
 
     const requiredPermissions = [PermissionFlagsBits.ManageWebhooks];
+
     if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
 
     let channel = interaction.channel;
@@ -61,6 +63,7 @@ module.exports = {
       const allowedChannel = interaction.guild.channels.cache.get(
         settings.channelId,
       );
+
       if (!allowedChannel) {
         return interaction.editReply(
           '設定されている専用チャンネルが見つかりません。管理者が削除した可能性があります',
@@ -89,6 +92,7 @@ module.exports = {
     }
 
     let user;
+
     try {
       user = await interaction.guild.members
         .fetch(target.id)
@@ -113,6 +117,7 @@ module.exports = {
     }
 
     const permissions = channel.permissionsFor(interaction.client.user);
+
     if (!permissions || !permissions.has(PermissionFlagsBits.ManageWebhooks)) {
       return interaction.editReply(
         'このチャンネルではWebhookを作成する権限がありません',

@@ -57,9 +57,11 @@ module.exports = {
       PermissionFlagsBits.ViewChannel,
       PermissionFlagsBits.ReadMessageHistory,
     ];
+
     if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
 
     let message;
+
     try {
       message = await channel.messages.fetch(messageId);
     } catch {
@@ -68,6 +70,7 @@ module.exports = {
 
     let emojiKey = emojiInput;
     const customEmojiMatch = emojiInput.match(/^<a?:\w+:(\d+)>$/);
+
     if (customEmojiMatch) emojiKey = customEmojiMatch[1];
 
     const reaction =
@@ -83,6 +86,7 @@ module.exports = {
 
     while (true) {
       const fetched = await reaction.users.fetch({ limit: 100, after: lastId });
+
       if (fetched.size === 0) break;
 
       allUsers = allUsers.concat(fetched.map((u) => u));
