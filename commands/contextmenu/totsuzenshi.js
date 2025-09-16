@@ -9,7 +9,7 @@ const { generateTotsuzenshi } = require('../../lib/totsuzenshi/totsuzenshi');
 const invalidContentChecks = require('../../utils/invalidContentRegex');
 
 module.exports = {
-  cooldown: 5,
+  cooldown: 10,
   data: new ContextMenuCommandBuilder()
     .setName('突然の死ジェネレータ')
     .setType(ApplicationCommandType.Message)
@@ -23,7 +23,12 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const text = interaction.targetMessage.content;
-
+    if (!text || text.trim().length === 0) {
+      return interaction.editReply({
+        content: 'このメッセージにはテキストがありません',
+      });
+    }
+    
     for (const check of invalidContentChecks) {
       if (check.regex.test(text)) {
         return interaction.editReply({ content: check.error });

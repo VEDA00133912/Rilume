@@ -11,7 +11,7 @@ const invalidContentChecks = require('../../utils/invalidContentRegex');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {
-  cooldown: 5,
+  cooldown: 10,
   data: new ContextMenuCommandBuilder()
     .setName('Make it a Quote')
     .setType(ApplicationCommandType.Message)
@@ -26,9 +26,14 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
     const targetMessage = interaction.targetMessage;
 
+    if (!targetMessage.content || targetMessage.content.trim().length === 0) {
+      return interaction.editReply({
+        content: 'このメッセージにはテキストがありません',
+      });
+    }
+    
     for (const check of invalidContentChecks) {
       if (check.regex.test(targetMessage.content)) {
         return interaction.editReply({ content: check.error });
