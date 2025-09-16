@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   InteractionContextType,
   ApplicationIntegrationType,
+  MessageFlags,
 } = require('discord.js');
 const getRandomAnime = require('../../lib/anicode/anime');
 const { createEmbed } = require('../../utils/createEmbed');
@@ -16,7 +17,7 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-    await interaction.deferReply();
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const result = await getRandomAnime();
 
