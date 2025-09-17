@@ -158,6 +158,8 @@ module.exports = {
 
     try {
       await webhook.send({ content, username: displayname, avatarURL });
+
+      return interaction.editReply('送信完了!');
     } catch (error) {
       if (error.code === 10015) {
         await WebhookModel.deleteOne({
@@ -165,20 +167,27 @@ module.exports = {
           channelId: channel.id,
         });
 
-        webhook = await channel.createWebhook({ name: 'ImpersonateWebhook' });
+        const newWebhook = await channel.createWebhook({
+          name: 'ImpersonateWebhook',
+        });
+
         await WebhookModel.create({
           guildId: interaction.guild.id,
           channelId: channel.id,
-          webhookId: webhook.id,
-          token: webhook.token,
+          webhookId: newWebhook.id,
+          token: newWebhook.token,
         });
 
-        await webhook.send({ content, username: displayname, avatarURL });
-      } else {
-        return interaction.editReply('Webhookでの送信に失敗しました');
-      }
-    }
+        try {
+          await newWebhook.send({ content, username: displayname, avatarURL });
 
-    await interaction.editReply('送信完了!');
+          return interaction.editReply('送信完了!');
+        } catch {
+          return interaction.editReply('Webhookでの送信に失敗しました');
+        }
+      }
+
+      return interaction.editReply('Webhookでの送信に失敗しました');
+    }
   },
 };

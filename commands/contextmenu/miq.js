@@ -33,7 +33,7 @@ module.exports = {
         content: 'このメッセージにはテキストがありません',
       });
     }
-    
+
     for (const check of invalidContentChecks) {
       if (check.regex.test(targetMessage.content)) {
         return interaction.editReply({ content: check.error });

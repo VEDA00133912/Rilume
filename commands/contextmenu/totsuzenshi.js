@@ -23,12 +23,13 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const text = interaction.targetMessage.content;
+
     if (!text || text.trim().length === 0) {
       return interaction.editReply({
         content: 'このメッセージにはテキストがありません',
       });
     }
-    
+
     for (const check of invalidContentChecks) {
       if (check.regex.test(text)) {
         return interaction.editReply({ content: check.error });
