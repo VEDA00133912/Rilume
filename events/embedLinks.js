@@ -1,11 +1,12 @@
 const { Events, ChannelType } = require('discord.js');
 const { createEmbed } = require('../utils/createEmbed');
+const invalidContentChecks = require('../utils/invalidContentRegex');
 const {
   getMessageTypeDescription,
 } = require('../utils/getMessageTypeDescription');
 const { checkBlacklist, handleSpamCheck } = require('../utils/blackList');
 const Expand = require('../models/expandGuild');
-const MAX_LENGTH = 500;
+const MAX_LENGTH = 400;
 
 module.exports = {
   name: Events.MessageCreate,
@@ -41,10 +42,11 @@ module.exports = {
 
       const targetMsg = await channel.messages.fetch(messageId);
 
-      const inviteOrImgurRegex =
-        /(https?:\/\/(?:www\.)?(?:discord\.gg|discordapp\.com\/invite)\/[^\s]+|https?:\/\/(?:i\.)?imgur\.com\/\S+)/i;
-
-      if (inviteOrImgurRegex.test(targetMsg.content)) return;
+      for (const check of invalidContentChecks) {
+        if (check.regex.test(targetMsg.content)) {
+          return;
+        }
+      }
 
       const descriptionFromType = getMessageTypeDescription(targetMsg, fullUrl);
       let description = descriptionFromType || targetMsg.content || '';
@@ -85,7 +87,7 @@ module.exports = {
         allowedMentions: { repliedUser: false },
       });
     } catch (error) {
-      if ([10008, 50001, 50013].includes(error.code)) return;
+      if (error.code && [10008, 50001, 50013].includes(error.code)) return;
       console.error('メッセージリンク処理中にエラー:', error.message);
     }
   },
