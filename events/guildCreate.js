@@ -9,16 +9,18 @@ module.exports = {
       await ExpandGuild.findOneAndUpdate(
         { guildId: guild.id },
         { expand: false },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
 
       await ImpersonateGuild.findOneAndUpdate(
         { guildId: guild.id },
         { impersonate: false, channelId: null },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
 
-      console.log(`Initial registration completed for ${guild.name} (${guild.id})`);
+      console.log(
+        `Initial registration completed for ${guild.name} (${guild.id})`,
+      );
     } catch (error) {
       console.error('初期登録に失敗しました:', error);
     }

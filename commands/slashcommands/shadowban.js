@@ -16,8 +16,10 @@ module.exports = {
   cooldown: 15,
   data: new SlashCommandBuilder()
     .setName('shadowban')
-    .setDescription('指定したTwitterアカウントがシャドウバンされているかチェックします')
-    .addStringOption(option =>
+    .setDescription(
+      '指定したTwitterアカウントがシャドウバンされているかチェックします',
+    )
+    .addStringOption((option) =>
       option
         .setName('username')
         .setDescription('Twitterのユーザー名(@なしで)')
@@ -25,7 +27,10 @@ module.exports = {
         .setMinLength(1)
         .setMaxLength(15),
     )
-    .setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel,
+    ])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
