@@ -2,7 +2,6 @@ const { MessageType } = require('discord.js');
 const { Emojis } = require('./emoji.js');
 
 function getMessageTypeDescription(msg) {
-  console.log(Emojis.USER);
   switch (msg.type) {
     case MessageType.Default:
       return null;
@@ -11,7 +10,8 @@ function getMessageTypeDescription(msg) {
       return `${Emojis.PEN} チャンネル名が変更されました`;
     case MessageType.ChannelPinnedMessage:
       return `${Emojis.PIN_NEW} メッセージがピン留めされました`;
-
+    case MessageType.Reply:
+      return `${Emojis.REPLY} ${msg.content || '返信メッセージです'}`;
     case MessageType.UserJoin:
       return `${Emojis.NEW_MEMBER} ユーザーがサーバーに参加しました`;
     case MessageType.GuildBoost:
