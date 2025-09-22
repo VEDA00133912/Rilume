@@ -27,7 +27,7 @@ module.exports = {
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
     ]),
-    
+
   async execute(interaction) {
     const url = interaction.options.getString('url');
     const tweetIdMatch = url.match(/status\/(\d+)/);
