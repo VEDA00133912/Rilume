@@ -67,15 +67,13 @@ module.exports = {
     const messageLinkButton = new ButtonBuilder()
       .setLabel('元のメッセージへ')
       .setStyle(ButtonStyle.Link)
-      .setURL(
-        `https://discord.com/channels/${msg.guildId}/${msg.channelId}/${msg.id}`,
-      );
+      .setURL(msg.url);
 
     const actionRow = new ActionRowBuilder().addComponents(messageLinkButton);
 
     const embed = createEmbed(interaction, {
       author: {
-        name: `${msg.author.displayName || msg.author.username} (${msg.author.username})`,
+        name: `{msg.author.username})`,
         iconURL: msg.author.displayAvatarURL(),
       },
       description: embedContent || '不明なメッセージ',
