@@ -1,31 +1,27 @@
 module.exports = [
   {
     regex: /@everyone|@here/,
-    error: '❌️ everyoneやhereを含めることはできません。',
+    error: '❌️ everyoneやhereが含まれています',
   },
   {
     regex: /<@&\d+>|<@!\d+>|<@?\d+>/,
-    error: '❌️ メンションを含めることはできません。',
+    error: '❌️ メンションが含まれています',
   },
   {
     regex:
       /(?:https?:\/\/)?(?:discord\.(?:gg|com|me|app)(?:\/|\\)invite(?:\/|\\)?|discord\.(?:gg|me)(?:\/|\\)?)[a-zA-Z0-9]+/,
-    error: '❌️ 招待リンクを含むメッセージは送信できません。',
+    error: '❌️ 招待リンクが含まれています',
   },
   {
     regex: /https?:\/\/[^\s]+/,
-    error: '❌️ リンクを送信することはできません。',
+    error: '❌️ リンクが含まれています',
   },
   {
     regex: /[\w-]{24}\.[\w-]{6}\.[\w-]{27}/,
-    error: '❌️ トークンを含めることはできません。',
+    error: '❌️ トークンが含まれています',
   },
   {
     regex: /\|{4,}/,
-    error: '❌️ 連続するスポイラーを含めることはできません。',
-  },
-  {
-    regex: /(discord\.com|discord\.gg|invite|https|http)/i,
-    error: '❌️ リンクを送信することはできません。',
-  },
+    error: '❌️ 連続するスポイラーが含まれています',
+  }
 ];
