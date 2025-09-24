@@ -5,9 +5,16 @@ const {
   PermissionFlagsBits,
   ChannelType,
   MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
+const invalidContentChecks = require('../../utils/invalidContentRegex');
+const {
+  getMessageTypeDescription,
+} = require('../../utils/getMessageTypeDescription');
 
 module.exports = {
   cooldown: 15,
@@ -45,15 +52,36 @@ module.exports = {
       });
     }
 
+    for (const check of invalidContentChecks) {
+      if (check.regex.test(msg.content)) {
+        return interaction.reply({
+          content: check.error,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    }
+
+    const descriptionFromType = getMessageTypeDescription(msg);
+    let embedContent = descriptionFromType || msg.content || '';
+
+    const messageLinkButton = new ButtonBuilder()
+      .setLabel('元のメッセージへ')
+      .setStyle(ButtonStyle.Link)
+      .setURL(
+        `https://discord.com/channels/${msg.guildId}/${msg.channelId}/${msg.id}`,
+      );
+
+    const actionRow = new ActionRowBuilder().addComponents(messageLinkButton);
+
     const embed = createEmbed(interaction, {
       author: {
         name: `${msg.author.displayName || msg.author.username} (${msg.author.username})`,
         iconURL: msg.author.displayAvatarURL(),
       },
-      description: msg.content || '不明なメッセージ',
+      description: embedContent || '不明なメッセージ',
       timestamp: msg.createdAt,
     });
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed], components: [actionRow] });
   },
 };
