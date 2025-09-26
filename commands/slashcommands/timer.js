@@ -6,6 +6,7 @@ const {
 } = require('discord.js');
 const { setTimer } = require('../../lib/timer/setTimer');
 const { hasTimer } = require('../../lib/timer/storage');
+const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
   cooldown: 10,
@@ -32,6 +33,13 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
+    const requiredPermissions = [
+      PermissionFlagsBits.SendMessages,
+      PermissionFlagsBits.ViewChannel,
+    ];
+
+    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
+
     if (await hasTimer(interaction.user.id)) {
       return interaction.reply({
         content: 'すでにタイマーがセットされています',
@@ -47,6 +55,6 @@ module.exports = {
       content: `タイマーを${minutes}分${seconds}秒にセットしました\nタイマーが終了すると通知します`,
     });
 
-    setTimer(interaction, totalSeconds); // データの保存とタイマー開始
+    setTimer(interaction, totalSeconds);
   },
 };
