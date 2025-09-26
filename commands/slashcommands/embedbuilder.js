@@ -6,6 +6,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
+  PermissionFlagsBits,
 } = require('discord.js');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
@@ -18,7 +19,7 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-      const requiredPermissions = [
+    const requiredPermissions = [
       PermissionFlagsBits.SendMessages,
       PermissionFlagsBits.ViewChannel,
       PermissionFlagsBits.EmbedLinks,

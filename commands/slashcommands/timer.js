@@ -3,6 +3,7 @@ const {
   InteractionContextType,
   ApplicationIntegrationType,
   MessageFlags,
+  PermissionFlagsBits,
 } = require('discord.js');
 const { setTimer } = require('../../lib/timer/setTimer');
 const { hasTimer } = require('../../lib/timer/storage');
