@@ -135,9 +135,10 @@ module.exports = {
 
       await interaction.editReply({ embeds: [embed], files: [attachment] });
     } catch (err) {
-      console.error(err);
+      const apiError = err.response?.data?.error;
+
       await interaction.editReply({
-        content: '曲の取得に失敗しました',
+        content: apiError || '曲の取得に失敗しました',
         embeds: [],
       });
     }
