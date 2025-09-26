@@ -7,6 +7,7 @@ const {
   TextInputStyle,
   ActionRowBuilder,
 } = require('discord.js');
+const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
   cooldown: 10,
@@ -17,6 +18,14 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
+      const requiredPermissions = [
+      PermissionFlagsBits.SendMessages,
+      PermissionFlagsBits.ViewChannel,
+      PermissionFlagsBits.EmbedLinks,
+    ];
+
+    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
+
     const modal = new ModalBuilder()
       .setCustomId('embedBuilderModal')
       .setTitle('Embed作成');
