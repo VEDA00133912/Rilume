@@ -4,6 +4,8 @@ const {
   ChannelType,
   PermissionFlagsBits,
   MessageFlags,
+  InteractionContextType,
+  ApplicationIntegrationType,
 } = require('discord.js');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
@@ -12,6 +14,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('reactionusers')
     .setDescription('指定したメッセージのリアクションユーザーを取得します')
+    .setContexts([InteractionContextType.Guild])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .addChannelOption((option) =>
       option
         .setName('channel')

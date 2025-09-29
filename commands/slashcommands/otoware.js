@@ -9,6 +9,7 @@ const {
   ApplicationIntegrationType,
 } = require('discord.js');
 const otoware = require('../../lib/audio/otoware');
+const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 module.exports = {
   cooldown: 15,
@@ -31,6 +32,12 @@ module.exports = {
     if (!allowedExts.includes(fileInfo.ext.toLowerCase())) {
       return interaction.editReply(
         '対応しているファイル形式は MP3, OGG, WAV です',
+      );
+    }
+
+    if (attachment.size > MAX_FILE_SIZE) {
+      return interaction.editReply(
+        '8MB以下のファイルをアップロードしてください',
       );
     }
 
