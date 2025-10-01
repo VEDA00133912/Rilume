@@ -33,6 +33,11 @@ module.exports = {
         return null;
       }
 
+      const author = {
+        name: `${interaction.user.tag}`,
+        iconURL: `${interaction.user.displayAvatarURL()}`,
+      };
+
       for (const text of [title, description, footer || '']) {
         const error = checkInvalidContent(text);
 
@@ -50,6 +55,7 @@ module.exports = {
       }
 
       const previewEmbed = createEmbed(interaction, {
+        author,
         title,
         description,
         footer,
