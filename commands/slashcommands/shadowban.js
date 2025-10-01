@@ -63,7 +63,18 @@ module.exports = {
       return interaction.editReply({
         embeds: [
           createEmbed(interaction, {
-            description: `**@${username}** のアカウントは存在しません`,
+            description: `**@${username}**のアカウントは存在しません`,
+            color: Colors.Red,
+          }),
+        ],
+      });
+    }
+
+    if (data.suspend) {
+      return interaction.editReply({
+        embeds: [
+          createEmbed(interaction, {
+            description: `**@${username}**のアカウントは凍結されています`,
             color: Colors.Red,
           }),
         ],
