@@ -73,7 +73,7 @@ module.exports = {
 
     const embed = createEmbed(interaction, {
       author: {
-        name: `{msg.author.username})`,
+        name: msg.author.username,
         iconURL: msg.author.displayAvatarURL(),
       },
       description: embedContent || '不明なメッセージ',
