@@ -1,5 +1,8 @@
 const {
   SlashCommandBuilder,
+  ComponentType,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
   AttachmentBuilder,
   ChannelType,
   PermissionFlagsBits,
@@ -10,51 +13,29 @@ const {
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
 module.exports = {
-  cooldown: 10,
+  cooldown: 30,
   data: new SlashCommandBuilder()
-    .setName('reactionusers')
-    .setDescription('指定したメッセージのリアクションユーザーを取得します')
+    .setName('reactionuser')
+    .setDescription('指定メッセージのリアクションを取得します')
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
-    .addChannelOption((option) =>
+    .addStringOption(option =>
       option
-        .setName('channel')
-        .setDescription('対象のメッセージがあるチャンネル')
-        .addChannelTypes(ChannelType.GuildText)
-        .setRequired(true),
+        .setName('message')
+        .setDescription('メッセージリンクを入力してください')
+        .setRequired(true)
     )
-    .addStringOption((option) =>
-      option
-        .setName('message_id')
-        .setDescription('対象のメッセージID')
-        .setRequired(true),
-    )
-    .addStringOption((option) =>
-      option
-        .setName('emoji')
-        .setDescription('対象の絵文字(カスタム絵文字OK)')
-        .setRequired(true),
-    )
-    .addStringOption((option) =>
+    .addStringOption(option =>
       option
         .setName('type')
-        .setDescription('ユーザー名かIDを選択')
-        .setRequired(true)
+        .setDescription('取得するユーザーの情報（指定なしならユーザー名）')
         .addChoices(
-          { name: 'ユーザー名', value: 'username' },
           { name: 'ユーザーID', value: 'id' },
-        ),
+          { name: 'ユーザー名', value: 'name' },
+        )
     ),
 
   async execute(interaction) {
-    const channel = interaction.options.getChannel('channel');
-    const messageId = interaction.options.getString('message_id');
-    const emojiInputRaw = interaction.options.getString('emoji');
-    const type = interaction.options.getString('type');
-
-    // 前後の空白を削除
-    const emojiInput = emojiInputRaw.trim();
-
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const requiredPermissions = [
@@ -64,49 +45,97 @@ module.exports = {
 
     if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
 
-    let message;
+    const messageLink = interaction.options.getString('message');
+    const type = interaction.options.getString('type') ?? 'name';
 
+    const linkRegex = /discord(?:app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)/;
+    const match = messageLink.match(linkRegex);
+
+    if (!match) {
+      return interaction.editReply('無効なメッセージリンクです');
+    }
+
+    const [, guildId, channelId, messageId] = match;
+
+    let channel;
+    try {
+      channel = await interaction.client.channels.fetch(channelId);
+    } catch {
+      return interaction.editReply('チャンネルが取得できませんでした');
+    }
+
+    if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildAnnouncement)) {
+      return interaction.editReply('このチャンネルではメッセージを取得できません');
+    }
+
+    let message;
     try {
       message = await channel.messages.fetch(messageId);
     } catch {
       return interaction.editReply('メッセージが見つかりませんでした');
     }
 
-    let emojiKey = emojiInput;
-    const customEmojiMatch = emojiInput.match(/^<a?:\w+:(\d+)>$/);
+    const reactions = await Promise.all(
+      message.reactions.cache.map(async r => await r.fetch())
+    );
 
-    if (customEmojiMatch) emojiKey = customEmojiMatch[1];
-
-    const reaction =
-      message.reactions.cache.get(emojiKey) ||
-      message.reactions.cache.find((r) => r.emoji.toString() === emojiInput);
-
-    if (!reaction) {
-      return interaction.editReply('その絵文字のリアクションは見つかりません');
+    if (reactions.length === 0) {
+      return interaction.editReply('リアクションがありません');
     }
 
-    let allUsers = [];
-    let lastId;
+    const menu = new StringSelectMenuBuilder()
+      .setCustomId('reaction-select')
+      .setPlaceholder('リアクションを選択してください')
+      .addOptions(
+        reactions.map(r => ({
+      	  label: r.emoji.id ? r.emoji.name : r.emoji.toString(),
+          value: r.emoji.id || r.emoji.name,
+        }))
+      );
 
-    while (true) {
-      const fetched = await reaction.users.fetch({ limit: 100, after: lastId });
+    const row = new ActionRowBuilder().addComponents(menu);
 
-      if (fetched.size === 0) break;
-
-      allUsers = allUsers.concat(fetched.map((u) => u));
-      lastId = fetched.last().id;
-    }
-
-    if (allUsers.length === 0) {
-      return interaction.editReply('リアクションしているユーザーはいません');
-    }
-
-    const list = allUsers.map((u) => (type === 'username' ? u.username : u.id));
-    const content = list.join('\n');
-    const file = new AttachmentBuilder(Buffer.from(content, 'utf-8'), {
-      name: 'reactionusers.txt',
+    await interaction.editReply({
+      content: '取得するリアクションを選んでください\n制限時間は2分です',
+      components: [row],
     });
 
-    return interaction.editReply({ files: [file] });
+    let select;
+    try {
+      select = await interaction.channel.awaitMessageComponent({
+        componentType: ComponentType.StringSelect,
+        filter: i => i.user.id === interaction.user.id,
+        max: 1,
+        time: 120_000,
+      });
+    } catch {
+      return interaction.editReply('選択時間が終了しました');
+    }
+
+    const selected = select.values[0];
+    const reaction = reactions.find(
+      r => r.emoji.id === selected || r.emoji.name === selected
+    );
+
+    const users = await reaction.users.fetch();
+
+    if (users.size === 0) {
+      return select.update({
+        content: `**${reaction.emoji.toString()}**をリアクションしたユーザーはいません`,
+        components: [],
+      });
+    }
+
+    const lines = users.map(u => type === 'id' ? u.id : u.tag);
+    const text = lines.join('\n');
+
+    const fileName = `reaction_${reaction.emoji.name}_${messageId}.txt`;
+    const attachment = new AttachmentBuilder(Buffer.from(text), { name: fileName });
+
+    await select.update({
+      content: `**${reaction.emoji.toString()}**をリアクションしたユーザー一覧です`,
+      components: [],
+      files: [attachment],
+    });
   },
 };
