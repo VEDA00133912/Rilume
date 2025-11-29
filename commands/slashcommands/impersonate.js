@@ -29,8 +29,9 @@ module.exports = {
 
     const content = interaction.options.getString('content');
     const target = interaction.options.getUser('target');
+    const { guild } = interaction;
 
-    const settings = await Impersonate.findOne({ guildId: interaction.guild.id });
+    const settings = await Impersonate.findOne({ guildId: guild.id });
 
     if (settings?.impersonate === false || settings?.impersonate === 'false') {
       return interaction.editReply('このサーバーでは impersonate コマンドは無効になっています');
@@ -41,7 +42,7 @@ module.exports = {
     let channel = interaction.channel;
 
     if (settings?.channelId) {
-      const allowedChannel = interaction.guild.channels.cache.get(settings.channelId);
+      const allowedChannel = guild.channels.cache.get(settings.channelId);
 
       if (!allowedChannel) {
         return interaction.editReply('設定されている専用チャンネルが見つかりません。管理者が削除した可能性があります');
@@ -61,7 +62,7 @@ module.exports = {
     const invalid = invalidContentChecks.find((c) => c.regex.test(content));
     if (invalid) return interaction.editReply(invalid.error);
 
-    const user = await interaction.guild.members.fetch(target.id).then((m) => m.user).catch(() => null)
+    const user = await guild.members.fetch(target.id).then((m) => m.user).catch(() => null)
       ?? await interaction.client.users.fetch(target.id).catch(() => null);
 
     if (!user) return interaction.editReply('指定されたユーザーを取得できませんでした。');
@@ -77,15 +78,14 @@ module.exports = {
       return interaction.editReply('このチャンネルではWebhookを作成する権限がありません');
     }
 
-    const webhook = await getOrCreateWebhook(interaction, channel);
+    const webhook = await getOrCreateWebhook(interaction.client, guild.id, channel);
 
     try {
       await webhook.send({ content, username: displayname, avatarURL });
       return interaction.editReply('送信完了!');
     } catch (err) {
       if (err.code === 10015) {
-        const newWebhook = await createAndSaveWebhook(interaction, channel);
-
+        const newWebhook = await createAndSaveWebhook(channel, guild.id);
         try {
           await newWebhook.send({ content, username: displayname, avatarURL });
           return interaction.editReply('送信完了!');
@@ -98,29 +98,26 @@ module.exports = {
   },
 };
 
-async function getOrCreateWebhook(interaction, channel) {
-  const dbWebhook = await WebhookModel.findOne({
-    guildId: interaction.guild.id,
-    channelId: channel.id,
-  });
+async function getOrCreateWebhook(client, guildId, channel) {
+  const dbWebhook = await WebhookModel.findOne({ guildId, channelId: channel.id });
 
   if (dbWebhook) {
     try {
-      return await interaction.client.fetchWebhook(dbWebhook.webhookId, dbWebhook.token);
+      return await client.fetchWebhook(dbWebhook.webhookId, dbWebhook.token);
     } catch {
-      await WebhookModel.deleteOne({ guildId: interaction.guild.id, channelId: channel.id });
+      await WebhookModel.deleteOne({ guildId, channelId: channel.id });
     }
   }
 
-  return createAndSaveWebhook(interaction, channel);
+  return createAndSaveWebhook(channel, guildId);
 }
 
-async function createAndSaveWebhook(interaction, channel) {
+async function createAndSaveWebhook(channel, guildId) {
   const webhook = await channel.createWebhook({ name: 'ImpersonateWebhook' });
 
-  await WebhookModel.updateOne(
-    { guildId: interaction.guild.id, channelId: channel.id },
-    { $set: { webhookId: webhook.id, token: webhook.token } },
+  await WebhookModel.findOneAndUpdate(
+    { guildId, channelId: channel.id },
+    { webhookId: webhook.id, token: webhook.token },
     { upsert: true },
   );
 

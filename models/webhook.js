@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const webhookSchema = new mongoose.Schema({
+  guildId: {
+    type: String,
+    require: false
+  },
   channelId: {
     type: String,
     required: true,
