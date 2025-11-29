@@ -5,8 +5,8 @@ const {
   AttachmentBuilder,
   userMention,
 } = require('discord.js');
-const { generateIeiImage } = require('../../lib/iei/generateIei');
-const { downloadImage } = require('../../lib/iei/downloadIcon');
+const { generateIeiImage } = require('../../lib/generate/generateIei');
+const { downloadImage } = require('../../lib/generate/downloadIcon');
 const { createEmbed } = require('../../utils/createEmbed');
 
 module.exports = {

@@ -9,8 +9,8 @@ const {
   ApplicationIntegrationType,
 } = require('discord.js');
 const AdmZip = require('adm-zip');
-const { MCReader } = require('../../lib/mc2tja/mcreader');
-const { mc2tja } = require('../../lib/mc2tja/mc2tja');
+const { MCReader } = require('../../lib/generate/mcreader');
+const { mc2tja } = require('../../lib/generate/mc2tja');
 const { createEmbed } = require('../../utils/createEmbed');
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;

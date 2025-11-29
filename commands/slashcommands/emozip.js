@@ -3,7 +3,7 @@ const {
   InteractionContextType,
   ApplicationIntegrationType,
 } = require('discord.js');
-const { createEmoZip } = require('../../lib/emoZip/emozip');
+const { createEmoZip } = require('../../lib/generate/emozip');
 
 module.exports = {
   cooldown: 30,
