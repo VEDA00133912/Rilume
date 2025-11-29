@@ -1,40 +1,28 @@
-const { REST, Routes } = require('discord.js');
-const path = require('node:path');
-
 require('dotenv').config();
-const TOKEN = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
-const getCommandFilesRecursively = require('./utils/getCommandFiles');
+const { REST, Routes } = require('discord.js');
+const { join } = require('node:path');
+const getCommandFiles = require('./utils/getCommandFiles');
 
 module.exports = async function deployCommands(client) {
   const commands = [];
-  const commandsPath = path.join(__dirname, 'commands');
-  const commandFiles = getCommandFilesRecursively(commandsPath);
 
-  for (const filePath of commandFiles) {
-    const command = require(filePath);
-
-    if ('data' in command && 'execute' in command) {
-      client.commands.set(command.data.name, command);
-      commands.push(command.data.toJSON());
+  for (const filePath of getCommandFiles(join(__dirname, 'commands'))) {
+    const cmd = require(filePath);
+    if (cmd.data && cmd.execute) {
+      client.commands.set(cmd.data.name, cmd);
+      commands.push(cmd.data.toJSON());
     } else {
-      console.log(
-        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
-      );
+      console.log(`[WARNING] ${filePath} is missing "data" or "execute".`);
     }
   }
 
-  const rest = new REST().setToken(TOKEN);
+  const rest = new REST().setToken(process.env.TOKEN);
 
   try {
-    console.log(
-      `Started refreshing ${commands.length} application (/) commands.`,
-    );
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
-    console.log(
-      `Successfully reloaded ${commands.length} application (/) commands.`,
-    );
-  } catch (error) {
-    console.error(error.message);
+    console.log(`Refreshing ${commands.length} commands...`);
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+    console.log(`Reloaded ${commands.length} commands.`);
+  } catch (e) {
+    console.error(e.message);
   }
 };

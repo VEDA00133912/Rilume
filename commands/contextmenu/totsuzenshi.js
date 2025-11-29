@@ -5,7 +5,7 @@ const {
   ApplicationIntegrationType,
   MessageFlags,
 } = require('discord.js');
-const { generateTotsuzenshi } = require('../../lib/totsuzenshi/totsuzenshi');
+const { generateTotsuzenshi } = require('../../lib/generate/totsuzenshi');
 const invalidContentChecks = require('../../utils/invalidContentRegex');
 
 module.exports = {

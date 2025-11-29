@@ -1,12 +1,8 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const fs = require('node:fs');
-const path = require('node:path');
+const { readdirSync } = require('node:fs');
+const { join } = require('node:path');
 
-const TOKEN = process.env.TOKEN;
-
-// コマンドのロード
-const getCommandFilesRecursively = require('./utils/getCommandFiles');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -18,36 +14,18 @@ const client = new Client({
 
 client.commands = new Collection();
 client.cooldowns = new Collection();
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = getCommandFilesRecursively(commandsPath);
 
-for (const filePath of commandFiles) {
-  const command = require(filePath);
+const getCommandFiles = require('./utils/getCommandFiles');
 
-  if ('data' in command && 'execute' in command) {
-    client.commands.set(command.data.name, command);
-  } else {
-    console.log(
-      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
-    );
-  }
+for (const filePath of getCommandFiles(join(__dirname, 'commands'))) {
+  const cmd = require(filePath);
+  if (cmd.data && cmd.execute) client.commands.set(cmd.data.name, cmd);
+  else console.log(`[WARNING] ${filePath} is missing "data" or "execute".`);
 }
 
-// イベントのロード
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs
-  .readdirSync(eventsPath)
-  .filter((file) => file.endsWith('.js'));
-
-for (const file of eventFiles) {
-  const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
-
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args));
-  }
+for (const file of readdirSync(join(__dirname, 'events')).filter(f => f.endsWith('.js'))) {
+  const event = require(join(__dirname, 'events', file));
+  client[event.once ? 'once' : 'on'](event.name, (...args) => event.execute(...args));
 }
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);

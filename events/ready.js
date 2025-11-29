@@ -17,14 +17,14 @@ module.exports = {
 
     try {
       await mongoose.connect(MONGODB_URI);
-      console.log('✅ MongoDBに接続されました');
+      console.log('Connected to MongoDB');
 
       require('../lib/omikuji/resetOmikuji');
       await resumeTimers(client);
       await logStatus(client);
       scheduleLogging(client);
     } catch (error) {
-      console.error('❌ MongoDB接続エラー:', error.message);
+      console.error('Connection to MongoDB failed:', error.message);
     }
   },
 };

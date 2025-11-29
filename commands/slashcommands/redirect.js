@@ -6,7 +6,7 @@ const {
   Colors,
 } = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
-const { trackRedirects } = require('../../lib/redirect/redirectTracker');
+const { trackRedirects } = require('../../lib/url/redirectTracker');
 
 module.exports = {
   cooldown: 10,

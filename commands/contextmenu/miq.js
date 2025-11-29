@@ -15,45 +15,34 @@ module.exports = {
   data: new ContextMenuCommandBuilder()
     .setName('Make it a Quote')
     .setType(ApplicationCommandType.Message)
-    .setContexts([
-      InteractionContextType.Guild,
-      InteractionContextType.PrivateChannel,
-    ])
-    .setIntegrationTypes([
-      ApplicationIntegrationType.GuildInstall,
-      ApplicationIntegrationType.UserInstall,
-    ]),
+    .setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
+    .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall]),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const targetMessage = interaction.targetMessage;
+    const { targetMessage } = interaction;
 
-    if (!targetMessage.content || targetMessage.content.trim().length === 0) {
-      return interaction.editReply({
-        content: 'このメッセージにはテキストがありません',
-      });
+    if (!targetMessage.content?.trim()) {
+      return interaction.editReply({ content: 'このメッセージにはテキストがありません' });
     }
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(targetMessage.content)) {
-        return interaction.editReply({ content: check.error });
-      }
-    }
+    const invalid = invalidContentChecks.find(c => c.regex.test(targetMessage.content));
+    if (invalid) return interaction.editReply({ content: invalid.error });
 
-    const miq = new MiQ()
+    const response = await new MiQ()
       .setFromMessage(targetMessage)
       .setColor(true)
-      .setWatermark(interaction.client.user.tag);
+      .setWatermark(interaction.client.user.tag)
+      .generateBeta();
 
-    const response = await miq.generateBeta();
     const fileName = `miq-${targetMessage.id}.png`;
-    const attachment = new AttachmentBuilder(response, { name: fileName });
 
-    const embed = createEmbed(interaction, {
-      description: `**[元メッセージへ飛ぶ🕊️](${targetMessage.url})**`,
-      image: `attachment://${fileName}`,
+    await interaction.editReply({
+      embeds: [createEmbed(interaction, {
+        description: `**[元メッセージへ飛ぶ🕊️](${targetMessage.url})**`,
+        image: `attachment://${fileName}`,
+      })],
+      files: [new AttachmentBuilder(response, { name: fileName })],
     });
-
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
   },
 };
