@@ -12,9 +12,12 @@ const {
 const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 const invalidContentChecks = require('../../utils/invalidContentRegex');
-const {
-  getMessageTypeDescription,
-} = require('../../utils/getMessageTypeDescription');
+const { getMessageTypeDescription } = require('../../utils/getMessageTypeDescription');
+
+const REQUIRED_PERMISSIONS = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.ReadMessageHistory,
+];
 
 module.exports = {
   cooldown: 15,
@@ -25,7 +28,7 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-    const channel = interaction.channel;
+    const { channel } = interaction;
 
     if (channel.type !== ChannelType.GuildText) {
       return interaction.reply({
@@ -34,16 +37,10 @@ module.exports = {
       });
     }
 
-    const requiredPermissions = [
-      PermissionFlagsBits.ViewChannel,
-      PermissionFlagsBits.ReadMessageHistory,
-    ];
+    if (!(await checkBotPermissions(interaction, REQUIRED_PERMISSIONS))) return;
 
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
-
-    const msg = await channel.messages
-      .fetch({ after: '0', limit: 1 })
-      .then((messages) => messages.first());
+    const messages = await channel.messages.fetch({ after: '0', limit: 1 });
+    const msg = messages.first();
 
     if (!msg) {
       return interaction.reply({
@@ -52,34 +49,24 @@ module.exports = {
       });
     }
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(msg.content)) {
-        return interaction.reply({
-          content: check.error,
-          flags: MessageFlags.Ephemeral,
-        });
-      }
+    const invalid = invalidContentChecks.find((c) => c.regex.test(msg.content));
+    if (invalid) {
+      return interaction.reply({ content: invalid.error, flags: MessageFlags.Ephemeral });
     }
 
-    const descriptionFromType = getMessageTypeDescription(msg);
-    let embedContent = descriptionFromType || msg.content || '';
-
-    const messageLinkButton = new ButtonBuilder()
-      .setLabel('元のメッセージへ')
-      .setStyle(ButtonStyle.Link)
-      .setURL(msg.url);
-
-    const actionRow = new ActionRowBuilder().addComponents(messageLinkButton);
-
-    const embed = createEmbed(interaction, {
-      author: {
-        name: msg.author.username,
-        iconURL: msg.author.displayAvatarURL(),
-      },
-      description: embedContent || '不明なメッセージ',
-      timestamp: msg.createdAt,
+    await interaction.reply({
+      embeds: [
+        createEmbed(interaction, {
+          author: { name: msg.author.username, iconURL: msg.author.displayAvatarURL() },
+          description: getMessageTypeDescription(msg) || msg.content || '不明なメッセージ',
+          timestamp: msg.createdAt,
+        }),
+      ],
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder().setLabel('元のメッセージへ').setStyle(ButtonStyle.Link).setURL(msg.url),
+        ),
+      ],
     });
-
-    await interaction.reply({ embeds: [embed], components: [actionRow] });
   },
 };

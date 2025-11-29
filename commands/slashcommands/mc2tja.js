@@ -1,7 +1,7 @@
 const fs = require('node:fs');
-const path = require('node:path');
-const os = require('node:os');
-const crypto = require('node:crypto');
+const { join, basename, extname } = require('node:path');
+const { tmpdir } = require('node:os');
+const { randomUUID } = require('node:crypto');
 const {
   SlashCommandBuilder,
   AttachmentBuilder,
@@ -20,11 +20,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('mc2tja')
     .setDescription('MC・MCZ(Malodyの譜面ファイル)をTJAに変換します')
-    .addAttachmentOption((option) =>
-      option
-        .setName('file')
-        .setDescription('変換するMCまたはMCZファイル')
-        .setRequired(true),
+    .addAttachmentOption((opt) =>
+      opt.setName('file').setDescription('変換するMCまたはMCZファイル').setRequired(true),
     )
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
@@ -33,209 +30,95 @@ module.exports = {
     await interaction.deferReply();
 
     const attachment = interaction.options.getAttachment('file');
-
-    if (!attachment)
-      return replyError(interaction, 'ファイルが添付されていません');
-
     const name = attachment.name.toLowerCase();
 
-    if (!name.endsWith('.mc') && !name.endsWith('.mcz'))
-      return replyError(interaction, '.mcまたは.mczファイルのみ対応しています');
+    if (!name.endsWith('.mc') && !name.endsWith('.mcz')) {
+      return interaction.editReply('.mcまたは.mczファイルのみ対応しています');
+    }
 
     if (attachment.size > MAX_FILE_SIZE) {
-      return replyError(
-        interaction,
-        '8MB以下のファイルをアップロードしてください',
-      );
+      return interaction.editReply('8MB以下のファイルをアップロードしてください');
     }
 
-    await interaction.editReply({ content: 'ファイルをダウンロード中...' });
-    const fileBuffer = await downloadFile(attachment.url);
+    await interaction.editReply('ファイルをダウンロード中...');
 
-    let mcContent, originalFilename;
-    let attachments = [];
+    const res = await fetch(attachment.url);
+    const fileBuffer = Buffer.from(await res.arrayBuffer());
+
     const mcReader = new MCReader();
     const converter = new mc2tja();
+    const tempFiles = [];
 
-    if (name.endsWith('.mcz')) {
-      const extractResult = await extractMCZWithExtras(fileBuffer, interaction);
+    try {
+      let mcContent, mcFilename, otherFiles = [];
 
-      mcContent = extractResult.mcContent;
-      originalFilename = extractResult.mcFilename;
+      if (name.endsWith('.mcz')) {
+        await interaction.editReply('MCZファイルを展開中...');
+        const zip = new AdmZip(fileBuffer);
+        const mcEntry = zip.getEntries().find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
 
-      mcReader.parse(mcContent);
-      mcReader.filename = originalFilename;
+        if (!mcEntry) return interaction.editReply('.mcファイルが見つかりませんでした');
 
-      if (!converter.convert(mcReader)) {
-        return replyError(interaction, '変換に失敗しました');
-      }
-
-      const tjaFilename = path
-        .basename(originalFilename)
-        .replace(/\.mc$/i, '.tja');
-      const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
-
-      attachments.push(
-        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
-      );
-
-      if (extractResult.otherFiles.length > 0) {
-        const zip = new AdmZip();
-
-        zip.addLocalFile(tjaFilePath);
-
-        for (const file of extractResult.otherFiles) {
-          zip.addFile(file.filename, file.buffer);
-        }
-
-        // ユニークなzipファイルパス
-        const uniqueId = crypto.randomUUID();
-        const zipFilename = `${path.basename(attachment.name, path.extname(attachment.name))}_${uniqueId}_tja.zip`;
-        const zipFilePath = path.join(os.tmpdir(), zipFilename);
-
-        zip.writeZip(zipFilePath);
-
-        attachments = [
-          new AttachmentBuilder(zipFilePath, { name: zipFilename }),
-        ];
-
-        setTimeout(() => {
-          safeUnlink(tjaFilePath);
-          safeUnlink(zipFilePath);
-        }, 5000);
+        mcContent = mcEntry.getData().toString('utf8');
+        mcFilename = mcEntry.entryName;
+        otherFiles = zip
+          .getEntries()
+          .filter((e) => !e.isDirectory && e.entryName !== mcFilename)
+          .map((e) => ({ filename: basename(e.entryName), buffer: e.getData() }));
       } else {
-        setTimeout(() => safeUnlink(tjaFilePath), 5000);
+        mcContent = fileBuffer.toString('utf8');
+        mcFilename = attachment.name;
       }
-    } else {
-      mcContent = fileBuffer.toString('utf8');
-      originalFilename = attachment.name;
 
       mcReader.parse(mcContent);
-      mcReader.filename = originalFilename;
+      mcReader.filename = mcFilename;
 
       if (!converter.convert(mcReader)) {
-        return replyError(interaction, '変換に失敗しました');
+        return interaction.editReply('変換に失敗しました');
       }
 
-      const tjaFilename = path
-        .basename(originalFilename)
-        .replace(/\.mc$/i, '.tja');
-      const tjaFilePath = writeTempTJA(tjaFilename, converter.generated);
+      const tjaFilename = basename(mcFilename).replace(/\.mc$/i, '.tja');
+      const tjaPath = join(tmpdir(), `${randomUUID()}_${tjaFilename}`);
+      fs.writeFileSync(tjaPath, converter.generated, 'utf8');
+      tempFiles.push(tjaPath);
 
-      attachments.push(
-        new AttachmentBuilder(tjaFilePath, { name: tjaFilename }),
-      );
+      let attachments;
 
-      setTimeout(() => safeUnlink(tjaFilePath), 5000);
+      if (otherFiles.length > 0) {
+        const zip = new AdmZip();
+        zip.addLocalFile(tjaPath);
+        otherFiles.forEach((f) => zip.addFile(f.filename, f.buffer));
+
+        const zipPath = join(tmpdir(), `${basename(attachment.name, extname(attachment.name))}_${randomUUID()}_tja.zip`);
+        zip.writeZip(zipPath);
+        tempFiles.push(zipPath);
+
+        attachments = [new AttachmentBuilder(zipPath, { name: basename(zipPath).replace(/_[^_]+_tja\.zip$/, '_tja.zip') })];
+      } else {
+        attachments = [new AttachmentBuilder(tjaPath, { name: tjaFilename })];
+      }
+
+      const embed = createFileInfoEmbed(interaction, mcReader, converter, `${attachment.name} → ${attachments[0].name}`);
+
+      await interaction.editReply({ content: '変換が完了しました！', embeds: [embed], files: attachments });
+    } finally {
+      setTimeout(() => tempFiles.forEach((f) => fs.unlink(f, () => {})), 5000);
     }
-
-    const footerText = name.endsWith('.mcz')
-      ? `${attachment.name} → ${path.basename(attachments[0].name)}`
-      : attachment.name;
-
-    const embed = createFileInfoEmbed(
-      interaction,
-      mcReader,
-      converter,
-      footerText,
-    );
-
-    await interaction.editReply({
-      content: '変換が完了しました！',
-      embeds: [embed],
-      files: attachments,
-    });
   },
 };
 
-async function downloadFile(url) {
-  const res = await fetch(url);
+function createFileInfoEmbed(interaction, mcReader, converter, footer) {
+  const version = mcReader.meta?.version;
+  const course = version ? converter.getCourseFromName('command', version) : 'おに';
+  const level = version ? converter.getStarFromVersionText(version) : 10;
 
-  if (!res.ok) throw new Error(`Download failed: ${res.statusText}`);
-
-  return Buffer.from(await res.arrayBuffer());
-}
-
-async function extractMCZWithExtras(buffer, interaction) {
-  await interaction.editReply({ content: 'MCZファイルを展開中...' });
-  const zip = new AdmZip(buffer);
-
-  const mcEntry = zip
-    .getEntries()
-    .find((e) => e.entryName.toLowerCase().endsWith('.mc') && !e.isDirectory);
-
-  if (!mcEntry) throw new Error('.mcファイルが見つかりませんでした。');
-
-  const mcContent = mcEntry.getData().toString('utf8');
-  const mcFilename = mcEntry.entryName;
-
-  const otherFiles = zip
-    .getEntries()
-    .filter((e) => !e.isDirectory && e.entryName !== mcFilename)
-    .map((e) => ({
-      filename: path.basename(e.entryName),
-      buffer: e.getData(),
-    }));
-
-  return { mcContent, mcFilename, otherFiles };
-}
-
-function writeTempTJA(filename, content) {
-  const uniqueId = crypto.randomUUID();
-  const filePath = path.join(os.tmpdir(), `${uniqueId}_${filename}`);
-
-  fs.writeFileSync(filePath, content, 'utf8');
-
-  return filePath;
-}
-
-function safeUnlink(filePath) {
-  try {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  } catch (err) {
-    console.error('Temp file deletion failed:', err.message);
-  }
-}
-
-function replyError(interaction, message) {
-  return interaction.editReply({ content: message });
-}
-
-function createFileInfoEmbed(client, mcReader, converter, footer) {
-  let course = 'おに';
-  let level = 10;
-
-  try {
-    const version = mcReader.meta?.version;
-
-    if (version) {
-      course = converter.getCourseFromName('command', version);
-      level = converter.getStarFromVersionText(version);
-    }
-  } catch (e) {
-    console.error('Error getting file info:', e.message);
-  }
-
-  const fileInfo = {
-    title: mcReader.meta?.song?.title || 'Unknown',
-    artist: mcReader.meta?.song?.artist || 'Unknown',
-    course,
-    level,
-    noteCount: mcReader.note?.length || 0,
-    bpm: Math.round(mcReader.initTime?.bpm || 120),
-  };
-
-  return createEmbed(client, {
+  return createEmbed(interaction, {
     fields: [
-      { name: '楽曲名', value: fileInfo.title },
-      { name: 'アーティスト名', value: fileInfo.artist },
-      {
-        name: '難易度',
-        value: `${fileInfo.course} (${fileInfo.level}★)`,
-        inline: true,
-      },
-      { name: 'BPM', value: String(fileInfo.bpm), inline: true },
-      { name: 'ノーツ数', value: String(fileInfo.noteCount), inline: true },
+      { name: '楽曲名', value: mcReader.meta?.song?.title || 'Unknown' },
+      { name: 'アーティスト名', value: mcReader.meta?.song?.artist || 'Unknown' },
+      { name: '難易度', value: `${course} (${level}★)`, inline: true },
+      { name: 'BPM', value: String(Math.round(mcReader.initTime?.bpm || 120)), inline: true },
+      { name: 'ノーツ数', value: String(mcReader.note?.length || 0), inline: true },
     ],
     footer,
   });

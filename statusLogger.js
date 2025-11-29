@@ -10,7 +10,6 @@ async function logStatus(client) {
       0,
     ),
   });
-  console.log('✏️ Status logged:', new Date().toLocaleString('ja-JP'));
 }
 
 function scheduleLogging(client) {

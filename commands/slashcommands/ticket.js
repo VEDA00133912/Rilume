@@ -10,6 +10,12 @@ const {
 const { createEmbed } = require('../../utils/createEmbed');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
+const REQUIRED_PERMISSIONS = [
+  PermissionFlagsBits.ManageChannels,
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.SendMessages,
+];
+
 module.exports = {
   cooldown: 60,
   data: new SlashCommandBuilder()
@@ -20,29 +26,19 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-    const requiredPermissions = [
-      PermissionFlagsBits.ManageChannels,
-      PermissionFlagsBits.ViewChannel,
-      PermissionFlagsBits.SendMessages,
-    ];
-
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
-
-    const create = new ButtonBuilder()
-      .setCustomId('create')
-      .setStyle(ButtonStyle.Primary)
-      .setLabel('作成');
-
-    const embed = createEmbed(interaction, {
-      description:
-        'チケットチャンネルを作成するときは下のボタンを押してください',
-    });
-
-    const button = new ActionRowBuilder().addComponents(create);
+    if (!(await checkBotPermissions(interaction, REQUIRED_PERMISSIONS))) return;
 
     await interaction.reply({
-      embeds: [embed],
-      components: [button],
+      embeds: [
+        createEmbed(interaction, {
+          description: 'チケットチャンネルを作成するときは下のボタンを押してください',
+        }),
+      ],
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder().setCustomId('create').setStyle(ButtonStyle.Primary).setLabel('作成'),
+        ),
+      ],
     });
   },
 };

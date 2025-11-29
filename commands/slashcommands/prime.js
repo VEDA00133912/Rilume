@@ -10,8 +10,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('prime')
     .setDescription('素数かどうか判定します')
-    .addNumberOption((option) =>
-      option
+    .addNumberOption((opt) =>
+      opt
         .setName('number')
         .setDescription('判定する数字')
         .setRequired(true)

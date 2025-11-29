@@ -15,13 +15,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('setting-impersonate')
     .setDescription('webhookを使用するimpersonateの設定')
-    .setDefaultMemberPermissions(
-      PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageChannels,
-    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageChannels)
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('on-off')
         .setDescription('設定のオンオフを指定(省略可)')
         .addChoices(
@@ -29,48 +27,29 @@ module.exports = {
           { name: 'impersonateコマンドOFF', value: 'false' },
         ),
     )
-    .addBooleanOption((option) =>
-      option
-        .setName('create-channel')
-        .setDescription(
-          '専用チャンネルを新しく作成しますか？(YES=true, NO=false)',
-        ),
+    .addBooleanOption((opt) =>
+      opt.setName('create-channel').setDescription('専用チャンネルを新しく作成しますか？(YES=true, NO=false)'),
     ),
 
   async execute(interaction) {
-    const onOffOption = interaction.options.getString('on-off');
-    const createChannelOption =
-      interaction.options.getBoolean('create-channel') ?? false;
-
-    let status;
-
-    if (onOffOption === 'true') {
-      status = true;
-    } else if (onOffOption === 'false') {
-      status = false;
-    } else {
-      status = createChannelOption ? true : null;
-    }
-
-    const shouldCreateChannel = status === true && createChannelOption;
-
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    const onOff = interaction.options.getString('on-off');
+    const createChannel = interaction.options.getBoolean('create-channel') ?? false;
+
+    const status = onOff === 'true' ? true : onOff === 'false' ? false : createChannel ? true : null;
+    const shouldCreateChannel = status === true && createChannel;
 
     let settings = await Impersonate.findOne({ guildId: interaction.guild.id });
 
     if (!settings) {
-      settings = new Impersonate({
+      settings = await Impersonate.create({
         guildId: interaction.guild.id,
-        impersonate: status === null ? true : status,
+        impersonate: status ?? true,
         channelId: null,
       });
-      await settings.save();
     } else if (settings.impersonate === status && !shouldCreateChannel) {
-      console.log(settings.impersonate);
-
-      return interaction.editReply(
-        `すでにこのサーバーの設定は**${status ? 'ON' : 'OFF'}**になっています`,
-      );
+      return interaction.editReply(`すでにこのサーバーの設定は**${status ? 'ON' : 'OFF'}**になっています`);
     } else if (status !== null) {
       settings.impersonate = status;
       await settings.save();
@@ -83,29 +62,23 @@ module.exports = {
         channelMsg = `\n既存の専用チャンネル ${channelMention(settings.channelId)}`;
       } else {
         try {
-          const webhooks = await Webhook.find({
-            guildId: interaction.guild.id,
-          });
+          // 既存のWebhookを削除
+          const webhooks = await Webhook.find({ guildId: interaction.guild.id });
 
-          for (const wh of webhooks) {
-            try {
-              const channel = await interaction.guild.channels
-                .fetch(wh.channelId)
-                .catch(() => null);
-
-              if (channel) {
-                const fetched = await channel.fetchWebhooks().catch(() => null);
-                const webhook = fetched?.get(wh.webhookId);
-
-                if (webhook)
-                  await webhook.delete('専用チャンネル作成のため削除');
+          await Promise.all(
+            webhooks.map(async (wh) => {
+              try {
+                const channel = await interaction.guild.channels.fetch(wh.channelId).catch(() => null);
+                if (channel) {
+                  const fetched = await channel.fetchWebhooks().catch(() => null);
+                  await fetched?.get(wh.webhookId)?.delete('専用チャンネル作成のため削除');
+                }
+                await Webhook.deleteOne({ _id: wh._id });
+              } catch (err) {
+                console.warn(`Webhook削除失敗: ${wh.webhookId}`, err);
               }
-
-              await Webhook.deleteOne({ _id: wh._id });
-            } catch (err) {
-              console.warn(`Webhook削除失敗: ${wh.webhookId}`, err);
-            }
-          }
+            }),
+          );
 
           const channel = await interaction.guild.channels.create({
             name: 'impersonate専用',
@@ -125,8 +98,6 @@ module.exports = {
       }
     }
 
-    await interaction.editReply(
-      `impersonateコマンドが**${status ? 'ON' : 'OFF'}**に設定されました${channelMsg}`,
-    );
+    await interaction.editReply(`impersonateコマンドが**${status ? 'ON' : 'OFF'}**に設定されました${channelMsg}`);
   },
 };

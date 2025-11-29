@@ -3,7 +3,6 @@ const {
   InteractionContextType,
   ApplicationIntegrationType,
   userMention,
-  MessageFlags,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -15,12 +14,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('icon')
     .setDescription('指定したユーザーのアイコンを表示します')
-    .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('アイコンを表示するユーザー')
-        .setRequired(false),
-    )
+    .addUserOption((opt) => opt.setName('user').setDescription('アイコンを表示するユーザー'))
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
@@ -28,46 +22,31 @@ module.exports = {
     ]),
 
   async execute(interaction) {
-    const user = interaction.options.getUser('user') || interaction.user;
-
-    if (!user) {
-      return interaction.reply({
-        content: 'ユーザーが見つかりませんでした',
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
+    const user = interaction.options.getUser('user') ?? interaction.user;
     const avatarUrl = user.displayAvatarURL({ size: 1024, forceStatic: false });
 
-    const asset = user.avatarDecorationData?.asset;
-    const decorationUrl = asset
-      ? `https://cdn.discordapp.com/avatar-decoration-presets/${asset}.png`
-      : null;
+    const buttons = [
+      new ButtonBuilder().setLabel('アイコン').setStyle(ButtonStyle.Link).setURL(avatarUrl),
+    ];
 
-    const embed = createEmbed(interaction, {
-      description: `**${userMention(user.id)} のアイコン**`,
-      image: avatarUrl,
-    });
-
-    const buttons = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel('アイコン')
-        .setStyle(ButtonStyle.Link)
-        .setURL(avatarUrl),
-    );
-
-    if (decorationUrl) {
-      buttons.addComponents(
+    const decoAsset = user.avatarDecorationData?.asset;
+    if (decoAsset) {
+      buttons.push(
         new ButtonBuilder()
           .setLabel('アバターデコレーション')
           .setStyle(ButtonStyle.Link)
-          .setURL(decorationUrl),
+          .setURL(`https://cdn.discordapp.com/avatar-decoration-presets/${decoAsset}.png`),
       );
     }
 
     await interaction.reply({
-      embeds: [embed],
-      components: [buttons],
+      embeds: [
+        createEmbed(interaction, {
+          description: `**${userMention(user.id)} のアイコン**`,
+          image: avatarUrl,
+        }),
+      ],
+      components: [new ActionRowBuilder().addComponents(buttons)],
     });
   },
 };

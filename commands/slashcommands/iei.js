@@ -14,11 +14,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('iei')
     .setDescription('遺影画像を生成します')
-    .addUserOption((option) =>
-      option
-        .setName('target')
-        .setDescription('遺影にするユーザー')
-        .setRequired(false),
+    .addUserOption((opt) =>
+      opt.setName('target').setDescription('遺影にするユーザー'),
     )
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([
@@ -29,23 +26,23 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const user = interaction.options.getUser('target') || interaction.user;
-    const avatarUrl = user.displayAvatarURL({
-      extension: 'png',
-      size: 512,
-      forceStatic: true,
-    });
-    const avatarBuffer = await downloadImage(avatarUrl);
+    const user = interaction.options.getUser('target') ?? interaction.user;
+
+    const avatarBuffer = await downloadImage(
+      user.displayAvatarURL({ extension: 'png', size: 512, forceStatic: true }),
+    );
 
     const image = await generateIeiImage(avatarBuffer);
-    const attachment = new AttachmentBuilder(image, { name: 'iei.png' });
 
-    const embed = createEmbed(interaction, {
-      description: `${userMention(user.id)}が死亡しました`,
-      image: 'attachment://iei.png',
-      footer: `${user.username} died...💀`,
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          description: `${userMention(user.id)}が死亡しました`,
+          image: 'attachment://iei.png',
+          footer: `${user.username} died...💀`,
+        }),
+      ],
+      files: [new AttachmentBuilder(image, { name: 'iei.png' })],
     });
-
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
   },
 };

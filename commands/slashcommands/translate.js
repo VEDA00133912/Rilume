@@ -12,24 +12,21 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('translate')
     .setDescription('他言語に翻訳します')
-    .setContexts([
-      InteractionContextType.Guild,
-      InteractionContextType.PrivateChannel,
-    ])
+    .setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
     ])
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('text')
         .setDescription('翻訳したいテキスト')
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(200),
     )
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('language')
         .setDescription('翻訳先の言語を選んでください')
         .setRequired(true)
@@ -48,27 +45,23 @@ module.exports = {
     await interaction.deferReply();
 
     const text = interaction.options.getString('text');
-    const targetLanguage = interaction.options.getString('language');
+    const targetLang = interaction.options.getString('language');
 
-    if (!text) {
-      return interaction.editReply({ content: 'テキストが指定されていません' });
-    }
+    const invalid = invalidContentChecks.find((c) => c.regex.test(text));
+    if (invalid) return interaction.editReply(invalid.error);
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(text)) {
-        return interaction.editReply({ content: check.error });
-      }
-    }
+    const translated = await translator(text, '', targetLang);
 
-    const translatedText = await translator(text, '', targetLanguage);
-    const embed = createEmbed(interaction, {
-      title: '翻訳が完了しました！',
-      fields: [
-        { name: 'ja', value: text },
-        { name: `${targetLanguage}`, value: translatedText },
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          title: '翻訳が完了しました！',
+          fields: [
+            { name: 'ja', value: text },
+            { name: targetLang, value: translated },
+          ],
+        }),
       ],
     });
-
-    await interaction.editReply({ embeds: [embed] });
   },
 };

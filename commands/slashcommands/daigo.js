@@ -11,8 +11,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('daigo')
     .setDescription('テキストをメンタリストDaiGoのボイスに変換します')
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('text')
         .setDescription('音声にするテキスト')
         .setRequired(true)

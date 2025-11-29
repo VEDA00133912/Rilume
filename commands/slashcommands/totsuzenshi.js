@@ -11,8 +11,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('totsuzenshi')
     .setDescription('突然の死ジェネレータ')
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('text')
         .setDescription('生成したいテキスト')
         .setRequired(true)
@@ -37,12 +37,9 @@ module.exports = {
       return interaction.editReply({ content: 'テキストが指定されていません' });
     }
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(text)) {
-        return interaction.editReply({ content: check.error });
-      }
-    }
-
+    const invalid = invalidContentChecks.find((c) => c.regex.test(text));
+    if (invalid) return interaction.editReply(invalid.error);
+    
     const totsuzenshi = generateTotsuzenshi(text);
 
     await interaction.editReply({ content: totsuzenshi });

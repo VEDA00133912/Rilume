@@ -5,10 +5,16 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder,
+  LabelBuilder,
   PermissionFlagsBits,
 } = require('discord.js');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
+
+const REQUIRED_PERMISSIONS = [
+  PermissionFlagsBits.SendMessages,
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.EmbedLinks,
+];
 
 module.exports = {
   cooldown: 10,
@@ -19,53 +25,36 @@ module.exports = {
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall]),
 
   async execute(interaction) {
-    const requiredPermissions = [
-      PermissionFlagsBits.SendMessages,
-      PermissionFlagsBits.ViewChannel,
-      PermissionFlagsBits.EmbedLinks,
-    ];
+    if (!(await checkBotPermissions(interaction, REQUIRED_PERMISSIONS))) return;
 
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
+    const inputs = [
+      { id: 'embedTitle', label: 'タイトルを設定', dsc: 'ここに埋め込みのタイトルを入力', style: TextInputStyle.Short, required: true, max: 50 },
+      { id: 'embedDescription', label: '内容を設定', dsc: 'ここに埋め込みに表示したい内容を入力', style: TextInputStyle.Paragraph, required: true, max: 400 },
+      { id: 'embedColor', label: '色を設定 (例: #FF0000)', dsc: 'ここに色を指定(HEXで)', style: TextInputStyle.Short, required: false, min: 7, max: 7 },
+      { id: 'embedFooter', label: 'フッターを設定', dsc: 'ここに埋め込みのフッターに表示したい内容を入力', style: TextInputStyle.Short, required: false, min: 1, max: 50 },
+    ];
 
     const modal = new ModalBuilder()
       .setCustomId('embedBuilderModal')
       .setTitle('Embed作成');
 
-    const titleInput = new TextInputBuilder()
-      .setCustomId('embedTitle')
-      .setLabel('タイトルを設定')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(true)
-      .setMaxLength(50);
+    modal.addLabelComponents(
+      ...inputs.map((cfg) => {
+        const input = new TextInputBuilder()
+          .setCustomId(cfg.id)
+          .setStyle(cfg.style)
+          .setPlaceholder(cfg.dsc)
+          .setRequired(cfg.required);
 
-    const descInput = new TextInputBuilder()
-      .setCustomId('embedDescription')
-      .setLabel('内容を設定')
-      .setStyle(TextInputStyle.Paragraph)
-      .setRequired(true)
-      .setMaxLength(400);
+        if (cfg.min) input.setMinLength(cfg.min);
+        if (cfg.max) input.setMaxLength(cfg.max);
 
-    const colorInput = new TextInputBuilder()
-      .setCustomId('embedColor')
-      .setLabel('色を設定 (例: #FF0000)')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false)
-      .setMinLength(7)
-      .setMaxLength(7);
+        const labelComponent = new LabelBuilder()
+          .setLabel(cfg.label)
+          .setTextInputComponent(input);
 
-    const footerInput = new TextInputBuilder()
-      .setCustomId('embedFooter')
-      .setLabel('フッターを設定')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false)
-      .setMinLength(1)
-      .setMaxLength(50);
-
-    modal.addComponents(
-      new ActionRowBuilder().addComponents(titleInput),
-      new ActionRowBuilder().addComponents(descInput),
-      new ActionRowBuilder().addComponents(colorInput),
-      new ActionRowBuilder().addComponents(footerInput),
+        return labelComponent;
+      })
     );
 
     await interaction.showModal(modal);

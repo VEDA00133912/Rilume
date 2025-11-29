@@ -7,9 +7,26 @@ const {
   ApplicationIntegrationType,
 } = require('discord.js');
 const { createEmbed } = require('../../utils/createEmbed');
-const taikoLib = require('../../lib/random/taiko');
-const prskLib = require('../../lib/random/prsk');
-const path = require('path');
+const { join } = require('path');
+
+const GAMES = {
+  taiko: {
+    lib: require('../../lib/random/taiko'),
+    title: '太鼓の達人 ランダム選曲',
+    color: '#f94827',
+    asset: 'taiko.png',
+    defaultDiff: 'oni',
+    optName: 'stars',
+  },
+  prsk: {
+    lib: require('../../lib/random/prsk'),
+    title: 'プロセカ ランダム選曲',
+    color: '#77eedd',
+    asset: 'prsk.png',
+    defaultDiff: 'MASTER',
+    optName: 'level',
+  },
+};
 
 module.exports = {
   cooldown: 15,
@@ -26,11 +43,7 @@ module.exports = {
         .setName('taiko')
         .setDescription('太鼓の達人ランダム選曲')
         .addIntegerOption((opt) =>
-          opt
-            .setName('count')
-            .setDescription('取得数(1〜10)')
-            .setMinValue(1)
-            .setMaxValue(10),
+          opt.setName('count').setDescription('取得数(1〜10)').setMinValue(1).setMaxValue(10),
         )
         .addStringOption((opt) =>
           opt
@@ -46,11 +59,7 @@ module.exports = {
             ),
         )
         .addIntegerOption((opt) =>
-          opt
-            .setName('stars')
-            .setDescription('★の数')
-            .setMinValue(1)
-            .setMaxValue(10),
+          opt.setName('stars').setDescription('★の数').setMinValue(1).setMaxValue(10),
         ),
     )
     .addSubcommand((sub) =>
@@ -58,11 +67,7 @@ module.exports = {
         .setName('prsk')
         .setDescription('プロセカランダム選曲')
         .addIntegerOption((opt) =>
-          opt
-            .setName('count')
-            .setDescription('取得数(1〜10)')
-            .setMinValue(1)
-            .setMaxValue(10),
+          opt.setName('count').setDescription('取得数(1〜10)').setMinValue(1).setMaxValue(10),
         )
         .addStringOption((opt) =>
           opt
@@ -78,67 +83,43 @@ module.exports = {
             ),
         )
         .addIntegerOption((opt) =>
-          opt
-            .setName('level')
-            .setDescription('レベル')
-            .setMinValue(1)
-            .setMaxValue(32),
+          opt.setName('level').setDescription('レベル').setMinValue(1).setMaxValue(32),
         ),
     ),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
-    const count = interaction.options.getInteger('count') || 1;
-    let difficulty = interaction.options.getString('difficulty');
-    const starsOrLevel = interaction.options.getInteger(
-      sub === 'taiko' ? 'stars' : 'level',
-    );
+    const game = GAMES[sub];
 
-    if (!difficulty) difficulty = sub === 'taiko' ? 'oni' : 'MASTER';
+    const count = interaction.options.getInteger('count') ?? 1;
+    const difficulty = interaction.options.getString('difficulty') ?? game.defaultDiff;
+    const starOrLevel = interaction.options.getInteger(game.optName);
 
-    const loadingEmbed = new EmbedBuilder()
-      .setDescription('選曲中です..')
-      .setColor(Colors.Yellow);
-
-    await interaction.reply({ embeds: [loadingEmbed] });
+    await interaction.reply({
+      embeds: [new EmbedBuilder().setDescription('選曲中です..').setColor(Colors.Yellow)],
+    });
 
     try {
-      let result;
-      let attachment;
-      let attachmentName;
-
-      if (sub === 'taiko') {
-        result = await taikoLib.fetchRandom(count, difficulty, starsOrLevel);
-        attachmentName = 'taiko.png';
-        attachment = new AttachmentBuilder(
-          path.join(__dirname, '../../assets/random/taiko.png'),
-          { name: attachmentName },
-        );
-      } else {
-        result = await prskLib.fetchRandom(count, difficulty, starsOrLevel);
-        attachmentName = 'prsk.png';
-        attachment = new AttachmentBuilder(
-          path.join(__dirname, '../../assets/random/prsk.png'),
-          { name: attachmentName },
-        );
-      }
-
-      const embed = createEmbed(interaction, {
-        title:
-          sub === 'taiko' ? '太鼓の達人 ランダム選曲' : 'プロセカ ランダム選曲',
-        description: result.description,
-        color: sub === 'taiko' ? '#f94827' : '#77eedd',
-        footer: {
-          iconURL: `attachment://${attachmentName}`,
-        },
-      });
-
-      await interaction.editReply({ embeds: [embed], files: [attachment] });
-    } catch (err) {
-      const apiError = err.response?.data?.error;
+      const result = await game.lib.fetchRandom(count, difficulty, starOrLevel);
 
       await interaction.editReply({
-        content: apiError || '曲の取得に失敗しました',
+        embeds: [
+          createEmbed(interaction, {
+            title: game.title,
+            description: result.description,
+            color: game.color,
+            footer: { iconURL: `attachment://${game.asset}` },
+          }),
+        ],
+        files: [
+          new AttachmentBuilder(join(__dirname, '../../assets/random', game.asset), {
+            name: game.asset,
+          }),
+        ],
+      });
+    } catch (err) {
+      await interaction.editReply({
+        content: err.response?.data?.error || '曲の取得に失敗しました',
         embeds: [],
       });
     }

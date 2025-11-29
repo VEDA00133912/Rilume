@@ -6,7 +6,6 @@ const {
 } = require('discord.js');
 const getRandomAnime = require('../../lib/anicode/anime');
 const { createEmbed } = require('../../utils/createEmbed');
-const SYOBOI_URL = 'https://cal.syoboi.jp/tid/';
 
 module.exports = {
   cooldown: 10,
@@ -21,17 +20,18 @@ module.exports = {
 
     const result = await getRandomAnime();
 
-    if (result) {
-      const link = `${SYOBOI_URL}${result.id}`;
-      const embed = createEmbed(interaction, {
-        title: 'アニメを取得しました！',
-        description: `タイトル: **${result.title}**\n🔗 [リンク](${link})`,
-        footer: 'Powered by しょぼいカレンダー',
-      });
-
-      await interaction.editReply({ embeds: [embed] });
-    } else {
-      await interaction.editReply('見つかりませんでした');
+    if (!result) {
+      return interaction.editReply('見つかりませんでした');
     }
+
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          title: 'アニメを取得しました！',
+          description: `タイトル: **${result.title}**\n🔗 [リンク](https://cal.syoboi.jp/tid/${result.id})`,
+          footer: 'Powered by しょぼいカレンダー',
+        }),
+      ],
+    });
   },
 };

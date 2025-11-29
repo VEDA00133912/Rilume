@@ -18,8 +18,8 @@ module.exports = {
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
-    .addIntegerOption((option) =>
-      option
+    .addIntegerOption((opt) =>
+      opt
         .setName('seconds')
         .setDescription('低速モードの秒数を選択')
         .setRequired(true)
@@ -42,43 +42,31 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const channel = interaction.channel;
+
+    const { channel } = interaction;
 
     if (channel.type !== ChannelType.GuildText) {
-      return interaction.editReply({
-        content: 'このコマンドはテキストチャンネルでのみ使用できます',
-      });
+      return interaction.editReply('このコマンドはテキストチャンネルでのみ使用できます');
     }
 
-    const requiredPermissions = [PermissionFlagsBits.ManageChannels];
-
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
+    if (!(await checkBotPermissions(interaction, [PermissionFlagsBits.ManageChannels]))) return;
 
     const seconds = interaction.options.getInteger('seconds');
 
-    if (interaction.channel.rateLimitPerUser === seconds) {
-      return interaction.editReply({
-        content: `このチャンネルはすでに${seconds}秒の低速モードが設定されています`,
-      });
+    if (channel.rateLimitPerUser === seconds) {
+      return interaction.editReply(`このチャンネルはすでに${seconds}秒の低速モードが設定されています`);
     }
 
     await channel.setRateLimitPerUser(seconds);
 
-    let embed;
-
-    if (seconds === 0) {
-      embed = createEmbed(interaction, {
-        description: '低速モードを解除しました',
-        color: Colors.Green,
-      });
-    } else {
-      embed = createEmbed(interaction, {
-        title: '低速モードの設定が完了しました',
-        description: `低速モードを${seconds}秒に設定しました`,
-        color: Colors.Green,
-      });
-    }
-
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          title: seconds === 0 ? undefined : '低速モードの設定が完了しました',
+          description: seconds === 0 ? '低速モードを解除しました' : `低速モードを${seconds}秒に設定しました`,
+          color: Colors.Green,
+        }),
+      ],
+    });
   },
 };

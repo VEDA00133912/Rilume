@@ -16,15 +16,9 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
+
     const info = await getServerInfo(interaction.guild);
 
-    const embed = createEmbed(interaction, {
-      title: info.title,
-      fields: info.fields,
-      thumbnail: info.thumbnail,
-      color: info.color,
-    });
-
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [createEmbed(interaction, info)] });
   },
 };

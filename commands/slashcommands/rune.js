@@ -12,8 +12,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('rune')
     .setDescription('ルーン文字に変換します')
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('text')
         .setDescription('変換したいテキスト')
         .setRequired(true)
@@ -28,25 +28,21 @@ module.exports = {
 
     const text = interaction.options.getString('text');
 
-    if (!text) {
-      return interaction.editReply({ content: 'テキストが指定されていません' });
-    }
+    const invalid = invalidContentChecks.find((c) => c.regex.test(text));
+    if (invalid) return interaction.editReply(invalid.error);
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(text)) {
-        return interaction.editReply({ content: check.error });
-      }
-    }
+    const result = await specialTranslator('rune', text);
 
-    const runeText = await specialTranslator('rune', text);
-    const embed = createEmbed(interaction, {
-      title: 'ルーン文字への変換が完了しました！',
-      fields: [
-        { name: '元のテキスト', value: text },
-        { name: 'ルーン文字', value: runeText },
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          title: 'ルーン文字への変換が完了しました！',
+          fields: [
+            { name: '元のテキスト', value: text },
+            { name: 'ルーン文字', value: result },
+          ],
+        }),
       ],
     });
-
-    await interaction.editReply({ embeds: [embed] });
   },
 };

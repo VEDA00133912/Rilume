@@ -19,15 +19,15 @@ module.exports = {
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
     ])
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('top')
         .setDescription('上部に表示するテキスト')
         .setRequired(true)
         .setMaxLength(30),
     )
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('bottom')
         .setDescription('下部に表示するテキスト')
         .setRequired(true)

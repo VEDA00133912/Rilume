@@ -13,12 +13,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('redirect')
     .setDescription('URLのリダイレクト調査します')
-    .addStringOption((option) =>
-      option
-        .setName('url')
-        .setDescription('追跡したいURLを入力')
-        .setRequired(true),
-    )
+    .addStringOption((opt) => opt.setName('url').setDescription('追跡したいURLを入力').setRequired(true))
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
@@ -29,26 +24,30 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const url = interaction.options.getString('url');
-    const redirectResult = await trackRedirects(url);
+    const result = await trackRedirects(url);
 
-    if (redirectResult.error) {
-      const errorEmbed = createEmbed(interaction, {
-        title: 'リダイレクト追跡失敗',
-        description: `❌ ${redirectResult.error}`,
-        color: Colors.Red,
+    if (result.error) {
+      return interaction.editReply({
+        embeds: [
+          createEmbed(interaction, {
+            title: 'リダイレクト追跡失敗',
+            description: `❌ ${result.error}`,
+            color: Colors.Red,
+          }),
+        ],
       });
-
-      return await interaction.editReply({ embeds: [errorEmbed] });
     }
 
-    const embed = createEmbed(interaction, {
-      fields: redirectResult.map((item, index) => ({
-        name: `リダイレクト先 ${index + 1}`,
-        value: item.url || '不明なURL',
-      })),
-      color: Colors.Green,
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          fields: result.map((item, i) => ({
+            name: `リダイレクト先 ${i + 1}`,
+            value: item.url || '不明なURL',
+          })),
+          color: Colors.Green,
+        }),
+      ],
     });
-
-    await interaction.editReply({ embeds: [embed] });
   },
 };

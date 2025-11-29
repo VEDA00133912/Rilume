@@ -9,6 +9,10 @@ const {
 } = require('discord.js');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
+const GUILD_ID = '1327953028619304981';
+const ANNOUNCE_CHANNEL_ID = '1405744801084735559';
+const CHANNEL_NAME = 'りょうんち製作所お知らせ';
+
 module.exports = {
   cooldown: 30,
   data: new SlashCommandBuilder()
@@ -21,39 +25,25 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const guildId = '1327953028619304981';
-    const announcementChannelId = '1405744801084735559';
-    const newChannelName = 'りょうんち製作所お知らせ';
+    const requiredPerms = [PermissionFlagsBits.ManageWebhooks, PermissionFlagsBits.ManageChannels];
+    if (!(await checkBotPermissions(interaction, requiredPerms))) return;
 
-    const guild = await interaction.client.guilds.fetch(guildId);
-    const announceChannel = await guild.channels.fetch(announcementChannelId);
-
-    const requiredPermissions = [
-      PermissionFlagsBits.ManageWebhooks,
-      PermissionFlagsBits.ManageChannels,
-    ];
-
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
-
-    const existingChannel = interaction.guild.channels.cache.find(
-      (c) => c.name === newChannelName && c.type === ChannelType.GuildText,
+    const existing = interaction.guild.channels.cache.find(
+      (c) => c.name === CHANNEL_NAME && c.type === ChannelType.GuildText,
     );
 
-    if (existingChannel) {
-      return interaction.editReply(
-        `既に同じ名前のチャンネル ${channelMention(existingChannel.id)} が存在します`,
-      );
+    if (existing) {
+      return interaction.editReply(`既に同じ名前のチャンネル ${channelMention(existing.id)} が存在します`);
     }
 
-    const followChannel = await interaction.guild.channels.create({
-      name: newChannelName,
-      type: ChannelType.GuildText,
-    });
+    const [guild, followChannel] = await Promise.all([
+      interaction.client.guilds.fetch(GUILD_ID),
+      interaction.guild.channels.create({ name: CHANNEL_NAME, type: ChannelType.GuildText }),
+    ]);
 
+    const announceChannel = await guild.channels.fetch(ANNOUNCE_CHANNEL_ID);
     await announceChannel.addFollower(followChannel.id);
 
-    await interaction.editReply(
-      `${channelMention(followChannel.id)} を作成しました`,
-    );
+    await interaction.editReply(`${channelMention(followChannel.id)} を作成しました`);
   },
 };

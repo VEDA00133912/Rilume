@@ -29,30 +29,25 @@ module.exports = {
     const user = interaction.targetUser;
 
     if (!user) {
-      await interaction.reply({
-        content: 'ユーザーが見つかりませんでした',
-        flags: MessageFlags.Ephemeral,
-      });
-
+      await interaction.reply({ content: 'ユーザーが見つかりませんでした', flags: MessageFlags.Ephemeral,});
       return;
     }
 
-    const avatarUrl = user.displayAvatarURL({
-      extension: 'png',
-      size: 512,
-      forceStatic: true,
-    });
-    const avatarBuffer = await downloadImage(avatarUrl);
+    const avatarBuffer = await downloadImage(
+      user.displayAvatarURL({ extension: 'png', size: 512, forceStatic: true }),
+    );
 
     const image = await generateIeiImage(avatarBuffer);
-    const attachment = new AttachmentBuilder(image, { name: 'iei.png' });
 
-    const embed = createEmbed(interaction, {
-      description: `${userMention(user.id)}が死亡しました`,
-      image: 'attachment://iei.png',
-      footer: `${user.username} died...💀`,
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          description: `${userMention(user.id)}が死亡しました`,
+          image: 'attachment://iei.png',
+          footer: `${user.username} died...💀`,
+        }),
+      ],
+      files: [new AttachmentBuilder(image, { name: 'iei.png' })],
     });
-
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
   },
 };

@@ -13,15 +13,15 @@ module.exports = {
     .setDescription(
       '多面ダイスを振ります(数指定無しの場合普通の6面サイコロです)',
     )
-    .addIntegerOption((option) =>
-      option
+    .addIntegerOption((opt) =>
+      opt
         .setName('count')
         .setDescription('振る個数を指定してください')
         .setMinValue(1)
         .setMaxValue(100),
     )
-    .addIntegerOption((option) =>
-      option
+    .addIntegerOption((opt) =>
+      opt
         .setName('max')
         .setDescription('サイコロの最大値を指定してください')
         .setMinValue(1)

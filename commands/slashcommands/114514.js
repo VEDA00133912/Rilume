@@ -12,8 +12,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('114514')
     .setDescription('数値を「114514」だけになるように変換します')
-    .addIntegerOption((option) =>
-      option
+    .addIntegerOption((opt) =>
+      opt
         .setName('number')
         .setDescription('変換したい数値')
         .setRequired(true),

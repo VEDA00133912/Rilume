@@ -12,6 +12,13 @@ const {
 } = require('discord.js');
 const { checkBotPermissions } = require('../../utils/checkPermissions');
 
+const REQUIRED_PERMISSIONS = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.ReadMessageHistory,
+];
+
+const LINK_REGEX = /discord(?:app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)/;
+
 module.exports = {
   cooldown: 30,
   data: new SlashCommandBuilder()
@@ -19,123 +26,91 @@ module.exports = {
     .setDescription('指定メッセージのリアクションを取得します')
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
-    .addStringOption(option =>
-      option
-        .setName('message')
-        .setDescription('メッセージリンクを入力してください')
-        .setRequired(true)
+    .addStringOption((opt) =>
+      opt.setName('message').setDescription('メッセージリンクを入力してください').setRequired(true),
     )
-    .addStringOption(option =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('type')
         .setDescription('取得するユーザーの情報（指定なしならユーザー名）')
         .addChoices(
           { name: 'ユーザーID', value: 'id' },
           { name: 'ユーザー名', value: 'name' },
-        )
+        ),
     ),
 
   async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const requiredPermissions = [
-      PermissionFlagsBits.ViewChannel,
-      PermissionFlagsBits.ReadMessageHistory,
-    ];
-
-    if (!(await checkBotPermissions(interaction, requiredPermissions))) return;
+    if (!(await checkBotPermissions(interaction, REQUIRED_PERMISSIONS))) return;
 
     const messageLink = interaction.options.getString('message');
     const type = interaction.options.getString('type') ?? 'name';
 
-    const linkRegex = /discord(?:app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)/;
-    const match = messageLink.match(linkRegex);
+    const match = messageLink.match(LINK_REGEX);
+    if (!match) return interaction.editReply('無効なメッセージリンクです');
 
-    if (!match) {
-      return interaction.editReply('無効なメッセージリンクです');
-    }
+    const [, , channelId, messageId] = match;
 
-    const [, guildId, channelId, messageId] = match;
-
-    let channel;
-    try {
-      channel = await interaction.client.channels.fetch(channelId);
-    } catch {
+    const channel = await interaction.client.channels.fetch(channelId).catch(() => null);
+    if (!channel || ![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
       return interaction.editReply('チャンネルが取得できませんでした');
     }
 
-    if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildAnnouncement)) {
-      return interaction.editReply('このチャンネルではメッセージを取得できません');
-    }
+    const message = await channel.messages.fetch(messageId).catch(() => null);
+    if (!message) return interaction.editReply('メッセージが見つかりませんでした');
 
-    let message;
-    try {
-      message = await channel.messages.fetch(messageId);
-    } catch {
-      return interaction.editReply('メッセージが見つかりませんでした');
-    }
-
-    const reactions = await Promise.all(
-      message.reactions.cache.map(async r => await r.fetch())
-    );
-
-    if (reactions.length === 0) {
-      return interaction.editReply('リアクションがありません');
-    }
-
-    const menu = new StringSelectMenuBuilder()
-      .setCustomId('reaction-select')
-      .setPlaceholder('リアクションを選択してください')
-      .addOptions(
-        reactions.map(r => ({
-      	  label: r.emoji.id ? r.emoji.name : r.emoji.toString(),
-          value: r.emoji.id || r.emoji.name,
-        }))
-      );
-
-    const row = new ActionRowBuilder().addComponents(menu);
+    const reactions = await Promise.all(message.reactions.cache.map((r) => r.fetch()));
+    if (!reactions.length) return interaction.editReply('リアクションがありません');
 
     await interaction.editReply({
       content: '取得するリアクションを選んでください\n制限時間は2分です',
-      components: [row],
+      components: [
+        new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId('reaction-select')
+            .setPlaceholder('リアクションを選択してください')
+            .addOptions(
+              reactions.map((r) => ({
+                label: r.emoji.id ? r.emoji.name : r.emoji.toString(),
+                value: r.emoji.id || r.emoji.name,
+              })),
+            ),
+        ),
+      ],
     });
 
-    let select;
-    try {
-      select = await interaction.channel.awaitMessageComponent({
+    const select = await interaction.channel
+      .awaitMessageComponent({
         componentType: ComponentType.StringSelect,
-        filter: i => i.user.id === interaction.user.id,
-        max: 1,
+        filter: (i) => i.user.id === interaction.user.id,
         time: 120_000,
-      });
-    } catch {
-      return interaction.editReply('選択時間が終了しました');
-    }
+      })
+      .catch(() => null);
+
+    if (!select) return interaction.editReply({ content: '選択時間が終了しました', components: [] });
 
     const selected = select.values[0];
-    const reaction = reactions.find(
-      r => r.emoji.id === selected || r.emoji.name === selected
-    );
-
+    const reaction = reactions.find((r) => r.emoji.id === selected || r.emoji.name === selected);
     const users = await reaction.users.fetch();
 
-    if (users.size === 0) {
+    if (!users.size) {
       return select.update({
-        content: `**${reaction.emoji.toString()}**をリアクションしたユーザーはいません`,
+        content: `**${reaction.emoji}** をリアクションしたユーザーはいません`,
         components: [],
       });
     }
 
-    const lines = users.map(u => type === 'id' ? u.id : u.tag);
-    const text = lines.join('\n');
-
-    const fileName = `reaction_${reaction.emoji.name}_${messageId}.txt`;
-    const attachment = new AttachmentBuilder(Buffer.from(text), { name: fileName });
+    const text = users.map((u) => (type === 'id' ? u.id : u.tag)).join('\n');
 
     await select.update({
-      content: `**${reaction.emoji.toString()}**をリアクションしたユーザー一覧です`,
+      content: `**${reaction.emoji}** をリアクションしたユーザー一覧です`,
       components: [],
-      files: [attachment],
+      files: [
+        new AttachmentBuilder(Buffer.from(text), {
+          name: `reaction_${reaction.emoji.name}_${messageId}.txt`,
+        }),
+      ],
     });
   },
 };

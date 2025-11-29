@@ -15,8 +15,8 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes([ApplicationIntegrationType.GuildInstall])
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('on-off')
         .setDescription('設定のオンオフを指定(デフォルトON)')
         .setRequired(true)

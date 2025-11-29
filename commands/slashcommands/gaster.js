@@ -13,8 +13,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('gaster')
     .setDescription('ガスター文字に変換します')
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('text')
         .setDescription('変換したいテキスト')
         .setRequired(true)
@@ -29,25 +29,21 @@ module.exports = {
 
     const text = interaction.options.getString('text');
 
-    if (!text) {
-      return interaction.editReply({ content: 'テキストが指定されていません' });
-    }
+    const invalid = invalidContentChecks.find((c) => c.regex.test(text));
+    if (invalid) return interaction.editReply(invalid.error);
 
-    for (const check of invalidContentChecks) {
-      if (check.regex.test(text)) {
-        return interaction.editReply({ content: check.error });
-      }
-    }
+    const result = await specialTranslator('gaster', text);
 
-    const gasterText = await specialTranslator('gaster', text);
-    const embed = createEmbed(interaction, {
-      title: 'ガスター文字への変換が完了しました！',
-      fields: [
-        { name: '元のテキスト', value: text },
-        { name: 'ガスター文字', value: gasterText },
+    await interaction.editReply({
+      embeds: [
+        createEmbed(interaction, {
+          title: 'ガスター文字への変換が完了しました！',
+          fields: [
+            { name: '元のテキスト', value: text },
+            { name: 'ガスター文字', value: result },
+          ],
+        }),
       ],
     });
-
-    await interaction.editReply({ embeds: [embed] });
   },
 };

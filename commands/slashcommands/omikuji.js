@@ -8,6 +8,12 @@ const { createEmbed } = require('../../utils/createEmbed');
 const Omikuji = require('../../models/omikuji');
 const { drawOmikuji } = require('../../lib/omikuji/drawOmikuji');
 
+function getJstMidnight() {
+  const now = new Date();
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return new Date(Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate()));
+}
+
 module.exports = {
   cooldown: 60,
   data: new SlashCommandBuilder()
@@ -20,15 +26,7 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const userId = interaction.user.id;
-
-    const now = new Date();
-    const jstOffset = 9 * 60;
-    const jstTime = new Date(now.getTime() + jstOffset * 60 * 1000);
-    const jstYear = jstTime.getUTCFullYear();
-    const jstMonth = jstTime.getUTCMonth();
-    const jstDate = jstTime.getUTCDate();
-
-    const todayStart = new Date(Date.UTC(jstYear, jstMonth, jstDate, 0, 0, 0));
+    const todayStart = getJstMidnight();
 
     const alreadyDrawn = await Omikuji.findOne({
       userId,
@@ -36,24 +34,21 @@ module.exports = {
     });
 
     if (alreadyDrawn) {
-      await interaction.editReply(
+      return interaction.editReply(
         '今日のおみくじはもう引いています。明日また引いてください！',
       );
-
-      return;
     }
 
     const result = drawOmikuji();
-
     await Omikuji.create({ userId, date: new Date() });
 
-    const embed = createEmbed(interaction, {
-      description: `あなたは今日は **${result.label}** です！`,
-      image: `attachment://${result.name}.png`,
-    });
-
     await interaction.editReply({
-      embeds: [embed],
+      embeds: [
+        createEmbed(interaction, {
+          description: `あなたは今日は **${result.label}** です！`,
+          image: `attachment://${result.name}.png`,
+        }),
+      ],
       files: [{ attachment: result.imagePath, name: `${result.name}.png` }],
     });
   },

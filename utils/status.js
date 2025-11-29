@@ -1,6 +1,9 @@
 const { ActivityType, PresenceUpdateStatus } = require('discord.js');
 
-const statuses = ['{ Rilime } /help', 'Server: {server} / Member: {member}'];
+const STATUSES = [
+  '{ Rilime } /help',
+  'Server: {server} / Member: {member}',
+];
 
 let index = 0;
 
@@ -11,30 +14,25 @@ let index = 0;
 function startStatusRotation(client) {
   setInterval(() => {
     try {
-      let template = statuses[index];
+      let text = STATUSES[index];
 
-      if (template.includes('{server}')) {
-        const serverCount = client.guilds.cache.size;
-        const memberCount = client.guilds.cache.reduce(
-          (total, g) => total + (g.memberCount ?? 0),
-          0,
-        );
-
-        template = template
-          .replace('{server}', serverCount)
-          .replace('{member}', memberCount);
+      if (text.includes('{server}')) {
+        const guilds = client.guilds.cache;
+        text = text
+          .replace('{server}', guilds.size)
+          .replace('{member}', guilds.reduce((sum, g) => sum + (g.memberCount ?? 0), 0));
       }
 
       client.user.setPresence({
-        activities: [{ name: template, type: ActivityType.Custom }],
+        activities: [{ name: text, type: ActivityType.Custom }],
         status: PresenceUpdateStatus.Online,
       });
     } catch (err) {
       console.error('Error setting presence:', err);
     }
 
-    index = (index + 1) % statuses.length;
-  }, 30000);
+    index = (index + 1) % STATUSES.length;
+  }, 30_000);
 }
 
 module.exports = { startStatusRotation };

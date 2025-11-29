@@ -7,32 +7,20 @@ const {
 const { createEmbed } = require('../../utils/createEmbed');
 const { shortenUrl } = require('../../lib/url/urlShortener');
 
-function isValidUrl(string) {
-  try {
-    new URL(string);
-
-    return true;
-  } catch {
-    return false;
-  }
-}
+const isValidUrl = (str) => URL.canParse?.(str) ?? (() => { try { new URL(str); return true; } catch { return false; } })();
 
 module.exports = {
   cooldown: 10,
   data: new SlashCommandBuilder()
     .setName('short')
     .setDescription('URLを短縮します')
-    .addStringOption((option) =>
-      option
-        .setName('url')
-        .setDescription('短縮したいURLを入力してください')
-        .setRequired(true),
+    .addStringOption((opt) =>
+      opt.setName('url').setDescription('短縮したいURLを入力してください').setRequired(true),
     )
-    .addStringOption((option) =>
-      option
+    .addStringOption((opt) =>
+      opt
         .setName('service')
         .setDescription('使用する短縮サービスを選択')
-        .setRequired(false)
         .addChoices(
           { name: 'x.gd', value: 'xgd' },
           { name: 'is.gd', value: 'isgd' },
@@ -46,19 +34,23 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const url = interaction.options.getString('url');
-    const service = interaction.options.getString('service') || 'xgd';
+    const service = interaction.options.getString('service') ?? 'xgd';
 
-    if (!isValidUrl(url))
+    if (!isValidUrl(url)) {
       return interaction.editReply('有効なURLを入力してください');
+    }
 
     try {
       const shortUrl = await shortenUrl(url, service);
-      const embed = createEmbed(interaction, {
-        description: shortUrl,
-        fields: [{ name: '元のURL', value: url }],
-      });
 
-      await interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({
+        embeds: [
+          createEmbed(interaction, {
+            description: shortUrl,
+            fields: [{ name: '元のURL', value: url }],
+          }),
+        ],
+      });
     } catch (err) {
       console.error(err.message);
       await interaction.editReply(err.message);

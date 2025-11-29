@@ -11,26 +11,14 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('userinfo')
     .setDescription('ユーザー情報を表示します')
-    .addUserOption((option) =>
-      option
-        .setName('target')
-        .setDescription('情報を取得するユーザー')
-        .setRequired(false),
-    )
+    .addUserOption((opt) => opt.setName('target').setDescription('情報を取得するユーザー'))
     .setContexts([InteractionContextType.Guild])
     .setIntegrationTypes(ApplicationIntegrationType.GuildInstall),
 
   async execute(interaction) {
-    const user = interaction.options.getUser('target') || interaction.user;
+    const user = interaction.options.getUser('target') ?? interaction.user;
     const info = await getUserInfo(interaction.guild, user);
 
-    const embed = createEmbed(interaction, {
-      title: info.title,
-      fields: info.fields,
-      thumbnail: info.thumbnail,
-      color: info.color,
-    });
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [createEmbed(interaction, info)] });
   },
 };
